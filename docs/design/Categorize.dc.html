@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #05070c; font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #F5A623; text-decoration: none; }
+  a:hover { color: #ffc55a; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  @keyframes popIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+  @keyframes doneIn { from { opacity: 0; transform: translateY(10px) scale(.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes sugPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(245,166,35,.0); } 50% { box-shadow: 0 0 0 6px rgba(245,166,35,.12); } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 28px; background: radial-gradient(1200px 700px at 50% -10%, #12151f 0%, #05070c 60%);">
+  <div style="position: relative; width: 390px; height: 844px; background: #0f1117; border-radius: 46px; border: 1px solid rgba(255,255,255,.08); box-shadow: 0 40px 90px rgba(0,0,0,.6), inset 0 0 0 6px #05070c; overflow: hidden;">
+
+    <div style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 116px; height: 30px; background: #05070c; border-radius: 18px; z-index: 60;"></div>
+
+    <!-- status bar -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; height: 54px; padding: 0 26px;">
+      <span style="font-family: 'Space Grotesk'; font-weight: 600; font-size: 15px; color: #EDEFF5;">9:41</span>
+      <div style="display: flex; align-items: center; gap: 7px;">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="#EDEFF5"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg>
+        <div style="display: flex; align-items: center; gap: 2px;"><div style="width: 22px; height: 11px; border: 1.4px solid rgba(237,239,245,.6); border-radius: 3px; padding: 1.5px;"><div style="width: 70%; height: 100%; background: #EDEFF5; border-radius: 1px;"></div></div><div style="width: 2px; height: 4px; background: rgba(237,239,245,.6); border-radius: 0 1px 1px 0;"></div></div>
+      </div>
+    </div>
+
+    <!-- header -->
+    <div style="position: absolute; top: 62px; left: 20px; right: 20px; z-index: 20; display: flex; align-items: center; justify-content: space-between;">
+      <button style="width: 38px; height: 38px; border-radius: 12px; background: #1a1d27; border: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EDEFF5" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+      <div style="text-align: center;">
+        <div style="font-size: 15.5px; font-weight: 800; color: #EDEFF5;">Куди віднести?</div>
+        <div style="font-size: 12px; font-weight: 600; color: #6c7185; margin-top: 1px;">{{ counter }}</div>
+      </div>
+      <div style="width: 38px; height: 38px;"></div>
+    </div>
+
+    <!-- ring stage -->
+    <div style="position: absolute; top: 108px; left: 50%; transform: translateX(-50%); width: 340px; height: 340px;">
+      <!-- categories -->
+      <sc-for list="{{ cats }}" as="c" hint-placeholder-count="8">
+        <div style="{{ c.wrapStyle }}">
+          <div style="{{ c.circleStyle }}">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{ c.iconColor }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ c.iconPath }}"/></svg>
+          </div>
+          <sc-if value="{{ c.star }}" hint-placeholder-val="{{ false }}">
+            <div style="position: absolute; top: -3px; right: -3px; width: 18px; height: 18px; border-radius: 50%; background: #F5A623; display: flex; align-items: center; justify-content: center; z-index: 3;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="#1a1200"><path d="m12 2 2.6 6.3L21 9l-5 4.3L17.5 20 12 16.5 6.5 20 8 13.3 3 9l6.4-.7z"/></svg>
+            </div>
+          </sc-if>
+          <div style="{{ c.labelStyle }}">{{ c.label }}</div>
+        </div>
+      </sc-for>
+
+      <!-- depth stack behind -->
+      <div style="position: absolute; top: 50%; left: 50%; width: 156px; height: 138px; transform: translate(-50%, calc(-50% + 16px)) scale(.9); background: #161922; border: 1px solid rgba(255,255,255,.05); border-radius: 22px; z-index: 4; opacity: .55;"></div>
+      <div style="position: absolute; top: 50%; left: 50%; width: 156px; height: 138px; transform: translate(-50%, calc(-50% + 8px)) scale(.95); background: #191c26; border: 1px solid rgba(255,255,255,.06); border-radius: 22px; z-index: 5; opacity: .8;"></div>
+
+      <!-- draggable card -->
+      <div data-card onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerCancel="{{ onUp }}" style="position: absolute; top: 50%; left: 50%; width: 156px; height: 138px; transform: translate(-50%, -50%); z-index: 10; background: #1e222e; border: 1px solid rgba(255,255,255,.09); border-radius: 22px; padding: 16px; touch-action: none; cursor: grab; box-shadow: 0 18px 40px rgba(0,0,0,.5); display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 26px; height: 26px; border-radius: 50%; background: #7C5CE6; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 12px;">В</div>
+          <span style="font-size: 12.5px; font-weight: 700; color: #EDEFF5;">Партнер A</span>
+          <span style="font-size: 12px; font-weight: 600; color: #6c7185;">Сьогодні</span>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;">
+          <div style="font-size: 18px; font-weight: 800; color: #EDEFF5;">Steam</div>
+          <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 34px; line-height: 1; color: #EF5350;">−₴219</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- hint -->
+    <div style="position: absolute; top: 500px; left: 20px; right: 20px; text-align: center; z-index: 15;">
+      <div style="font-size: 13.5px; font-weight: 700; color: {{ hintColor }}; transition: color .2s;">{{ hint }}</div>
+    </div>
+
+    <!-- suggested quick chips -->
+    <div style="position: absolute; bottom: 100px; left: 20px; right: 20px; z-index: 15;">
+      <div style="font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #6c7185; font-weight: 700; text-align: center; margin-bottom: 12px;">Схоже на</div>
+      <div style="display: flex; gap: 10px;">
+        <sc-for list="{{ suggested }}" as="s" hint-placeholder-count="3">
+          <button onClick="{{ s.pick }}" style="{{ s.style }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{ s.color }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ s.icon }}"/></svg>
+            <span style="font-size: 13px; font-weight: 700; color: #EDEFF5;">{{ s.label }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <!-- skip -->
+    <button style="position: absolute; bottom: 54px; left: 50%; transform: translateX(-50%); z-index: 15; background: none; border: none; cursor: pointer; font-size: 13px; font-weight: 700; color: #6c7185;">Пропустити →</button>
+
+    <!-- success overlay -->
+    <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; inset: 0; z-index: 90; background: rgba(11,13,18,.92); backdrop-filter: blur(8px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 40px; text-align: center; animation: popIn .22s ease;">
+        <div style="width: 92px; height: 92px; border-radius: 26px; background: {{ doneBg }}; display: flex; align-items: center; justify-content: center; animation: doneIn .35s ease;">
+          <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="{{ doneColor }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ doneIcon }}"/></svg>
+        </div>
+        <div style="font-size: 22px; font-weight: 800; color: #EDEFF5;">Steam → {{ doneLabel }}</div>
+        <div style="font-size: 14px; font-weight: 600; color: #8a90a2;">Наступного разу запропонуємо автоматично</div>
+        <button onClick="{{ reset }}" style="margin-top: 8px; padding: 13px 26px; background: #1a1d27; border: 1px solid rgba(255,255,255,.08); color: #EDEFF5; font-size: 14px; font-weight: 700; border-radius: 13px; cursor: pointer;">Ще раз</button>
+      </div>
+    </sc-if>
+
+    <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 128px; height: 5px; background: rgba(255,255,255,.28); border-radius: 999px; z-index: 80;"></div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 446, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = { active: null, done: false, assigned: null };
+
+  R = 140; BOX = 340;
+
+  CATS = [
+    { key: 'food',   label: 'Продукти',  color: '#F5A623', icon: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0' },
+    { key: 'shop',   label: 'Покупки',   color: '#4FC3C6', icon: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0' },
+    { key: 'sub',    label: 'Підписки',  color: '#5B8DEF', icon: 'M17 2l4 4-4 4 M3 11V9a4 4 0 0 1 4-4h14 M7 22l-4-4 4-4 M21 13v2a4 4 0 0 1-4 4H3' },
+    { key: 'fun',    label: 'Розваги',   color: '#7C83FF', icon: 'M2 3h20v18H2z M7 3v18 M17 3v18 M2 8h5 M17 8h5 M2 16h5 M17 16h5', suggested: true },
+    { key: 'transp', label: 'Транспорт', color: '#EF6C6C', icon: 'M3 17h18 M5 17a2 2 0 1 0 4 0 M15 17a2 2 0 1 0 4 0 M4.5 13l1.5-5.5h12L19.5 13 M4 13h16v4H4z' },
+    { key: 'health', label: "Здоров'я",  color: '#EF5350', icon: 'M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l9 8.6 9-8.6a5.5 5.5 0 0 0 0-7.8z' },
+    { key: 'home',   label: 'Дім',       color: '#4CAF50', icon: 'M3 10.5 12 3l9 7.5M5 9.5V20h14V9.5' },
+    { key: 'cafe',   label: 'Кафе',      color: '#E86BA5', icon: 'M2 8h16v8a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z M18 8h2a3 3 0 0 1 0 6h-2 M6 2v3 M10 2v3 M14 2v3' }
+  ];
+
+  pt(i) {
+    const ang = (-90 + i * 45) * Math.PI / 180;
+    return { x: this.R * Math.cos(ang), y: this.R * Math.sin(ang) };
+  }
+
+  onDown = (e) => {
+    const el = e.currentTarget; this.card = el;
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    this.start = { x: e.clientX, y: e.clientY };
+    el.style.transition = 'none'; el.style.cursor = 'grabbing'; el.style.zIndex = '30';
+  };
+  onMove = (e) => {
+    if (!this.start) return;
+    const dx = e.clientX - this.start.x, dy = e.clientY - this.start.y;
+    this.card.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${dx * 0.035}deg)`;
+    let best = null, bd = 1e9;
+    for (let i = 0; i < this.CATS.length; i++) {
+      const p = this.pt(i), d = Math.hypot(dx - p.x, dy - p.y);
+      if (d < bd) { bd = d; best = i; }
+    }
+    const mag = Math.hypot(dx, dy);
+    const active = (mag > 34 && bd < 74) ? best : null;
+    if (active !== this.state.active) this.setState({ active });
+  };
+  onUp = (e) => {
+    if (!this.start) return;
+    const a = this.state.active; this.start = null;
+    this.card.style.cursor = 'grab';
+    if (a != null) {
+      const p = this.pt(a);
+      this.card.style.transition = 'transform .34s cubic-bezier(.3,.7,.3,1), opacity .34s';
+      this.card.style.transform = `translate(calc(-50% + ${p.x}px), calc(-50% + ${p.y}px)) scale(.28)`;
+      this.card.style.opacity = '0';
+      setTimeout(() => this.setState({ done: true, assigned: this.CATS[a], active: null }), 320);
+    } else {
+      this.card.style.transition = 'transform .3s cubic-bezier(.2,.8,.3,1)';
+      this.card.style.transform = 'translate(-50%, -50%)';
+    }
+  };
+
+  pick = (i) => this.setState({ done: true, assigned: this.CATS[i], active: null });
+
+  reset = () => {
+    if (this.card) { this.card.style.transition = 'none'; this.card.style.transform = 'translate(-50%, -50%)'; this.card.style.opacity = '1'; this.card.style.zIndex = '10'; }
+    this.setState({ done: false, assigned: null, active: null });
+  };
+
+  renderVals() {
+    const active = this.state.active;
+    const c0 = this.BOX / 2;
+    const cats = this.CATS.map((c, i) => {
+      const p = this.pt(i);
+      const on = active === i;
+      const sug = !!c.suggested;
+      return {
+        label: c.label, iconColor: on ? c.color : (sug ? c.color : '#8a90a2'), iconPath: c.icon,
+        star: sug,
+        wrapStyle: {
+          position: 'absolute', left: (c0 + p.x) + 'px', top: (c0 + p.y) + 'px', width: '50px', height: '50px',
+          transform: `translate(-50%, -50%) scale(${on ? 1.2 : 1})`, transition: 'transform .16s ease', zIndex: on ? 8 : 6
+        },
+        circleStyle: {
+          width: '50px', height: '50px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: on ? (c.color + '2E') : (sug ? (c.color + '1C') : '#1a1d27'),
+          border: `1.5px solid ${on ? c.color : (sug ? (c.color + '77') : 'rgba(255,255,255,.07)')}`,
+          boxShadow: on ? `0 0 0 5px ${c.color}22, 0 10px 22px ${c.color}55` : 'none',
+          transition: 'background .16s, border-color .16s, box-shadow .16s'
+        },
+        labelStyle: {
+          position: 'absolute', top: '55px', left: '50%', transform: 'translateX(-50%)', whiteSpace: 'nowrap',
+          fontSize: '11px', fontWeight: 700, color: on ? c.color : '#6c7185', transition: 'color .16s'
+        }
+      };
+    });
+    const sIdx = [3, 0, 2];
+    const suggested = sIdx.map(i => {
+      const c = this.CATS[i];
+      return {
+        label: c.label, color: c.color, icon: c.icon, pick: () => this.pick(i),
+        style: {
+          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', padding: '13px 6px',
+          background: '#1a1d27', border: `1px solid ${c.color}3A`, borderRadius: '16px', cursor: 'pointer'
+        }
+      };
+    });
+    const as = this.state.assigned;
+    const isNear = active != null;
+    return {
+      cats, suggested,
+      counter: '1 з 6',
+      hint: isNear ? `Відпустити → ${this.CATS[active].label}` : 'Перетягни картку до категорії',
+      hintColor: isNear ? this.CATS[active].color : '#6c7185',
+      done: this.state.done,
+      doneLabel: as ? as.label : '',
+      doneColor: as ? as.color : '#4CAF50',
+      doneBg: as ? (as.color + '26') : 'rgba(76,175,80,.15)',
+      doneIcon: as ? as.icon : 'M20 6 9 17l-5-5',
+      onDown: this.onDown, onMove: this.onMove, onUp: this.onUp, pick: this.pick, reset: this.reset
+    };
+  }
+}
+</script>
+</body>
+</html>

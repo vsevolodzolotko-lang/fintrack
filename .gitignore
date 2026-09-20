@@ -1,0 +1,19 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.log
+.DS_Store
+server/prisma/*.db
+caddy_data/
+caddy_config/
+pgdata/
+web/dev-dist/
+# Deploy DB backups + any SQL dumps — never commit (contain all data)
+backups/
+*.sql
+.superpowers/
+# Local Claude Code state (permissions, worktrees)
+.claude/settings.local.json
+.claude/worktrees/

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #05070c; font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #F5A623; text-decoration: none; }
+  a:hover { color: #ffc55a; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  @keyframes popIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 28px; background: radial-gradient(1200px 700px at 50% -10%, #12151f 0%, #05070c 60%);">
+  <div style="position: relative; width: 390px; height: 844px; background: #0f1117; border-radius: 46px; border: 1px solid rgba(255,255,255,.08); box-shadow: 0 40px 90px rgba(0,0,0,.6), inset 0 0 0 6px #05070c; overflow: hidden;">
+
+    <div style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 116px; height: 30px; background: #05070c; border-radius: 18px; z-index: 60;"></div>
+
+    <!-- scroll body -->
+    <div class="noscroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 0 20px 40px; scrollbar-width: none;">
+
+      <!-- status bar -->
+      <div style="position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; height: 54px; background: #0f1117; margin: 0 -20px; padding: 0 26px;">
+        <span style="font-family: 'Space Grotesk'; font-weight: 600; font-size: 15px; color: #EDEFF5;">9:41</span>
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="#EDEFF5"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg>
+          <div style="display: flex; align-items: center; gap: 2px;"><div style="width: 22px; height: 11px; border: 1.4px solid rgba(237,239,245,.6); border-radius: 3px; padding: 1.5px;"><div style="width: 70%; height: 100%; background: #EDEFF5; border-radius: 1px;"></div></div><div style="width: 2px; height: 4px; background: rgba(237,239,245,.6); border-radius: 0 1px 1px 0;"></div></div>
+        </div>
+      </div>
+
+      <!-- header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+        <button style="width: 38px; height: 38px; border-radius: 12px; background: #1a1d27; border: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EDEFF5" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+        <div style="text-align: center;">
+          <div style="font-size: 16px; font-weight: 800; color: #EDEFF5;">Інвестиції</div>
+          <div style="font-size: 12px; font-weight: 600; color: #6c7185; margin-top: 1px;">Липень · план місяця</div>
+        </div>
+        <div style="width: 38px; height: 38px;"></div>
+      </div>
+
+      <!-- budget summary -->
+      <div style="margin-top: 18px; padding: 20px; background: linear-gradient(150deg, #22201a, #1a1d27 60%); border: 1px solid rgba(245,166,35,.22); border-radius: 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-size: 13px; font-weight: 700; color: #a4a9bd;">Відкласти цього місяця</div>
+          <div style="padding: 4px 10px; background: rgba(245,166,35,.16); border-radius: 999px; font-size: 11px; font-weight: 800; color: #F5A623;">15% доходу</div>
+        </div>
+        <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 44px; line-height: 1; color: #F5A623; margin-top: 10px;">₴8 550</div>
+        <div style="margin-top: 16px; height: 8px; background: rgba(255,255,255,.07); border-radius: 999px; overflow: hidden;">
+          <div style="height: 100%; width: {{ overallPct }}; background: linear-gradient(90deg, #F5A623, #ffbe4d); border-radius: 999px; transition: width .4s ease;"></div>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 9px;">
+          <span style="font-size: 12.5px; font-weight: 600; color: #8a90a2; white-space: nowrap;">Внесено <span style="color: #EDEFF5; font-weight: 700;">{{ overallDone }}</span></span>
+          <span style="font-size: 12.5px; font-weight: 600; color: #8a90a2; white-space: nowrap;">Лишилось {{ overallLeft }}</span>
+        </div>
+      </div>
+
+      <!-- Section A: checklist -->
+      <div style="margin-top: 26px; display: flex; align-items: baseline; justify-content: space-between;">
+        <div style="font-size: 17px; font-weight: 800; color: #EDEFF5;">Чекліст на зарплату</div>
+        <div style="font-size: 12.5px; font-weight: 700; color: #6c7185;">{{ stepsDone }}/3</div>
+      </div>
+
+      <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px;">
+        <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+          <div style="padding: 16px; background: #1a1d27; border: 1px solid {{ s.borderColor }}; border-radius: 18px;">
+            <div style="display: flex; align-items: center; gap: 13px;">
+              <div style="width: 46px; height: 46px; border-radius: 13px; background: {{ s.tileBg }}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{ s.color }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ s.icon }}"/></svg>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div style="font-size: 14.5px; font-weight: 800; color: #EDEFF5;">{{ s.label }}</div>
+                <div style="font-size: 12.5px; font-weight: 600; color: #8a90a2; margin-top: 2px;">Ціль {{ s.targetFmt }}</div>
+              </div>
+              <div style="{{ s.statusStyle }}">{{ s.statusText }}</div>
+            </div>
+
+            <div style="margin-top: 13px; height: 6px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden;">
+              <div style="height: 100%; width: {{ s.pct }}; background: {{ s.color }}; border-radius: 999px; transition: width .4s ease;"></div>
+            </div>
+            <div style="margin-top: 7px; font-size: 11.5px; font-weight: 600; color: #6c7185;">Внесено {{ s.contribFmt }} з {{ s.targetFmt }}</div>
+
+            <!-- hybrid capture banner -->
+            <sc-if value="{{ s.showBanner }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top: 13px; padding: 13px; background: rgba(79,195,198,.09); border: 1px solid rgba(79,195,198,.3); border-radius: 14px; animation: fadeIn .3s ease;">
+                <div style="display: flex; gap: 9px; align-items: flex-start;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4FC3C6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                  <div style="font-size: 12.5px; font-weight: 600; color: #c8d6d7; line-height: 1.4;">Схоже, ти поповнив <b style="color:#EDEFF5;">Inzhur на ₴2 140</b> · 12.07 з Mono</div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                  <button onClick="{{ s.confirm }}" style="flex: 1; padding: 10px; background: #4FC3C6; color: #05201f; border: none; border-radius: 11px; font-size: 12.5px; font-weight: 800; cursor: pointer;">Зарахувати</button>
+                  <button onClick="{{ s.record }}" style="padding: 10px 14px; background: rgba(255,255,255,.05); color: #EDEFF5; border: 1px solid rgba(255,255,255,.09); border-radius: 11px; font-size: 12.5px; font-weight: 700; cursor: pointer;">Змінити</button>
+                  <button onClick="{{ s.dismiss }}" style="padding: 10px 14px; background: none; color: #6c7185; border: none; font-size: 12.5px; font-weight: 700; cursor: pointer;">Ні</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <!-- record button when nothing yet & no banner -->
+            <sc-if value="{{ s.showRecord }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ s.record }}" style="width: 100%; margin-top: 13px; padding: 11px; background: rgba(255,255,255,.04); color: {{ s.color }}; border: 1px solid {{ s.borderColor }}; border-radius: 12px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ s.color }}" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Записати внесок
+              </button>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- Section B: OVDP ladder -->
+      <div style="margin-top: 26px; font-size: 17px; font-weight: 800; color: #EDEFF5;">Драбинка ОВДП</div>
+      <div style="margin-top: 4px; font-size: 12.5px; font-weight: 600; color: #6c7185; line-height: 1.4;">Погашення рознесені в часі — гроші звільняються рівномірно</div>
+      <div style="margin-top: 12px; background: #1a1d27; border: 1px solid rgba(255,255,255,.05); border-radius: 18px; overflow: hidden;">
+        <div style="display: flex; padding: 11px 16px; font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; font-weight: 700; color: #6c7185; border-bottom: 1px solid rgba(255,255,255,.05);">
+          <span style="flex: 1;">Погашення</span>
+          <span style="width: 78px; text-align: right;">Сума</span>
+          <span style="width: 66px; text-align: right;">Куплено</span>
+        </div>
+        <sc-for list="{{ ladder }}" as="l" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; padding: 13px 16px; border-bottom: 1px solid rgba(255,255,255,.04);">
+            <div style="flex: 1; display: flex; align-items: center; gap: 9px;">
+              <span style="width: 8px; height: 8px; border-radius: 50%; background: {{ l.dot }};"></span>
+              <div>
+                <div style="font-size: 13.5px; font-weight: 700; color: #EDEFF5;">{{ l.maturity }}</div>
+                <div style="font-size: 11px; font-weight: 600; color: {{ l.dot }};">{{ l.inDays }}</div>
+              </div>
+            </div>
+            <span style="width: 78px; text-align: right; font-family: 'Space Grotesk'; font-size: 13.5px; font-weight: 600; color: #EDEFF5;">{{ l.amount }}</span>
+            <span style="width: 66px; text-align: right; font-size: 12px; font-weight: 600; color: #6c7185;">{{ l.bought }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <!-- Section C: cumulative -->
+      <div style="margin-top: 26px; font-size: 17px; font-weight: 800; color: #EDEFF5;">Всього вкладено</div>
+      <div style="margin-top: 12px; padding: 18px; background: #1a1d27; border: 1px solid rgba(255,255,255,.05); border-radius: 18px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <span style="font-size: 13px; font-weight: 700; color: #8a90a2;">За весь час</span>
+          <span style="font-family: 'Space Grotesk'; font-size: 26px; font-weight: 700; color: #EDEFF5;">{{ cumTotal }}</span>
+        </div>
+        <!-- stacked bar -->
+        <div style="margin-top: 14px; display: flex; height: 10px; border-radius: 999px; overflow: hidden; gap: 2px;">
+          <div style="width: {{ cumOvdpPct }}; background: #F5A623;"></div>
+          <div style="width: {{ cumReitPct }}; background: #4FC3C6;"></div>
+          <div style="width: {{ cumCryptoPct }}; background: #7C83FF;"></div>
+        </div>
+        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 11px;">
+          <div style="display: flex; align-items: center; gap: 10px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #F5A623;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">ОВДП</span><span style="font-family: 'Space Grotesk'; font-size: 13.5px; font-weight: 600; color: #EDEFF5;">{{ cumOvdp }}</span></div>
+          <div style="display: flex; align-items: center; gap: 10px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #4FC3C6;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">Inzhur REIT</span><span style="font-family: 'Space Grotesk'; font-size: 13.5px; font-weight: 600; color: #EDEFF5;">{{ cumReit }}</span></div>
+          <div style="display: flex; align-items: center; gap: 10px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #7C83FF;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">Крипта</span><span style="font-family: 'Space Grotesk'; font-size: 13.5px; font-weight: 600; color: #EDEFF5;">{{ cumCrypto }}</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ============ RECORD BOTTOM SHEET ============ -->
+    <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ closeSheet }}" style="position: absolute; inset: 0; z-index: 70; background: rgba(5,7,12,.6); animation: fadeIn .2s ease;"></div>
+      <div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 71; background: #16192199; backdrop-filter: blur(18px); background: #171a24; border-top: 1px solid rgba(255,255,255,.09); border-radius: 26px 26px 0 0; padding: 10px 22px 28px; animation: sheetUp .28s cubic-bezier(.2,.8,.3,1);">
+        <div style="width: 40px; height: 5px; background: rgba(255,255,255,.18); border-radius: 999px; margin: 0 auto 16px;"></div>
+
+        <div style="display: flex; align-items: center; gap: 11px;">
+          <div style="width: 40px; height: 40px; border-radius: 12px; background: {{ sheetTileBg }}; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ sheetColor }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ sheetIcon }}"/></svg>
+          </div>
+          <div style="flex: 1;">
+            <div style="font-size: 15px; font-weight: 800; color: #EDEFF5;">{{ sheetLabel }}</div>
+            <div style="font-size: 12px; font-weight: 600; color: #8a90a2;">Записати внесок</div>
+          </div>
+        </div>
+
+        <!-- amount display -->
+        <div style="text-align: center; margin: 20px 0 6px;">
+          <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 46px; line-height: 1; color: {{ sheetColor }};">{{ sheetAmountFmt }}</div>
+        </div>
+
+        <!-- extra field -->
+        <sc-if value="{{ sheetShowMaturity }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; margin-top: 10px; background: #1e222e; border: 1px solid rgba(255,255,255,.06); border-radius: 13px;">
+            <span style="font-size: 13px; font-weight: 700; color: #a4a9bd;">Дата погашення</span>
+            <span style="font-size: 13.5px; font-weight: 700; color: #F5A623;">12.01.2027 ›</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sheetShowTicker }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px;">
+            <span style="font-size: 13px; font-weight: 700; color: #a4a9bd;">Актив:</span>
+            <span style="padding: 6px 13px; background: rgba(124,131,255,.16); color: #9aa0ff; border-radius: 999px; font-size: 12.5px; font-weight: 800;">BTC</span>
+            <span style="padding: 6px 13px; background: #1e222e; color: #8a90a2; border-radius: 999px; font-size: 12.5px; font-weight: 700;">+ інший</span>
+          </div>
+        </sc-if>
+
+        <!-- numpad -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px;">
+          <sc-for list="{{ keys }}" as="k" hint-placeholder-count="12">
+            <button onClick="{{ k.press }}" style="height: 52px; background: #1e222e; border: 1px solid rgba(255,255,255,.05); border-radius: 14px; font-family: 'Space Grotesk'; font-size: 21px; font-weight: 600; color: #EDEFF5; cursor: pointer; display: flex; align-items: center; justify-content: center;">{{ k.label }}</button>
+          </sc-for>
+        </div>
+
+        <button onClick="{{ confirmSheet }}" style="width: 100%; margin-top: 14px; padding: 16px; background: {{ sheetColor }}; color: #10130a; border: none; border-radius: 15px; font-size: 15px; font-weight: 800; cursor: pointer;">{{ sheetConfirmLabel }}</button>
+      </div>
+    </sc-if>
+
+    <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 128px; height: 5px; background: rgba(255,255,255,.28); border-radius: 999px; z-index: 80;"></div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 446, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = {
+    contrib: { OVDP: 5550, REIT: 0, CRYPTO: 0 },
+    bannerDismissed: { REIT: false },
+    sheetOpen: false, sheetKind: null, amount: ''
+  };
+
+  BUDGET = 8550;
+  TARGETS = { OVDP: 5550, REIT: 2140, CRYPTO: 860 };
+  PRIOR = { OVDP: 10600, REIT: 4140, CRYPTO: 1620 };
+  META = {
+    OVDP:   { label: 'ОВДП', color: '#F5A623', tileBg: 'rgba(245,166,35,.14)', icon: 'M3 22h18 M6 18V10 M10 18V10 M14 18V10 M18 18V10 M2 8l10-5 10 5 M2 8h20' },
+    REIT:   { label: 'Inzhur REIT', color: '#4FC3C6', tileBg: 'rgba(79,195,198,.14)', icon: 'M4 22V5a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1v17 M15 10h4a1 1 0 0 1 1 1v11 M4 22h18 M8 8h.01 M8 12h.01 M8 16h.01 M11 8h.01 M11 12h.01 M11 16h.01' },
+    CRYPTO: { label: 'Крипта', color: '#7C83FF', tileBg: 'rgba(124,131,255,.14)', icon: 'M11.8 19.1c4.9.9 6.1-6 1.2-6.9m-1.2 6.9L5.9 18m5.9 1.1-.4 2m1.6-8.9c4.9.9 6.1-6 1.2-6.9m-1.2 6.9-3.9-.7m5.1-6.2L8.3 4.3m5.9 1 .3-2M7.5 20.4 10.6 2.6' }
+  };
+
+  fmt(n) {
+    const s = Math.round(n).toString();
+    let out = ''; let c = 0;
+    for (let i = s.length - 1; i >= 0; i--) { out = s[i] + out; if (++c % 3 === 0 && i > 0) out = ' ' + out; }
+    return '₴' + out;
+  }
+
+  record = (k) => this.setState({ sheetOpen: true, sheetKind: k, amount: String(this.TARGETS[k]) });
+  closeSheet = () => this.setState({ sheetOpen: false });
+  confirm = (k) => this.setState(s => ({ contrib: { ...s.contrib, [k]: this.TARGETS[k] } }));
+  dismiss = (k) => this.setState(s => ({ bannerDismissed: { ...s.bannerDismissed, [k]: true } }));
+
+  press = (v) => {
+    this.setState(s => {
+      let a = s.amount;
+      if (v === '⌫') a = a.slice(0, -1);
+      else if (v === '000') a = a === '' ? '' : a + '000';
+      else a = (a === '0' ? '' : a) + v;
+      if (a.length > 7) a = a.slice(0, 7);
+      return { amount: a };
+    });
+  };
+  confirmSheet = () => {
+    this.setState(s => {
+      const k = s.sheetKind; const v = parseInt(s.amount || '0', 10);
+      return { contrib: { ...s.contrib, [k]: (s.contrib[k] || 0) + v }, sheetOpen: false };
+    });
+  };
+
+  renderVals() {
+    const c = this.state.contrib;
+    const order = ['OVDP', 'REIT', 'CRYPTO'];
+    const steps = order.map(k => {
+      const m = this.META[k], t = this.TARGETS[k], v = c[k];
+      const full = v >= t, partial = v > 0 && v < t;
+      const statusText = full ? '✓ Внесено' : (partial ? 'Частково' : 'Треба');
+      const statusColor = full ? '#4CAF50' : (partial ? m.color : '#6c7185');
+      const statusBg = full ? 'rgba(76,175,80,.14)' : (partial ? m.color + '1E' : 'rgba(255,255,255,.05)');
+      const hasSuggestion = k === 'REIT';
+      const showBanner = hasSuggestion && v === 0 && !this.state.bannerDismissed[k];
+      return {
+        key: k, label: m.label, color: m.color, icon: m.icon, tileBg: m.tileBg,
+        borderColor: full ? 'rgba(76,175,80,.28)' : 'rgba(255,255,255,.05)',
+        targetFmt: this.fmt(t), contribFmt: this.fmt(v),
+        pct: Math.min(100, (v / t) * 100) + '%',
+        statusText, showBanner, showRecord: v === 0 && !showBanner,
+        statusStyle: { padding: '5px 11px', borderRadius: '999px', fontSize: '11.5px', fontWeight: 800, color: statusColor, background: statusBg, whiteSpace: 'nowrap' },
+        record: () => this.record(k), confirm: () => this.confirm(k), dismiss: () => this.dismiss(k)
+      };
+    });
+    const doneTotal = order.reduce((a, k) => a + c[k], 0);
+    const stepsDone = order.filter(k => c[k] >= this.TARGETS[k]).length;
+
+    // ladder
+    const ladder = [
+      { maturity: '12 лис 2026', inDays: 'через 4 міс', amount: this.fmt(5200), bought: '12.05', dot: '#EF6C6C' },
+      { maturity: '12 гру 2026', inDays: 'через 5 міс', amount: this.fmt(5400), bought: '12.06', dot: '#F5A623' }
+    ];
+    if (c.OVDP > 0) ladder.push({ maturity: '12 січ 2027', inDays: 'через 6 міс', amount: this.fmt(c.OVDP), bought: '12.07', dot: '#4CAF50' });
+
+    // cumulative
+    const cum = { OVDP: this.PRIOR.OVDP + c.OVDP, REIT: this.PRIOR.REIT + c.REIT, CRYPTO: this.PRIOR.CRYPTO + c.CRYPTO };
+    const cumT = cum.OVDP + cum.REIT + cum.CRYPTO;
+
+    // sheet
+    const sk = this.state.sheetKind;
+    const sm = sk ? this.META[sk] : this.META.OVDP;
+    const amt = parseInt(this.state.amount || '0', 10);
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0', '⌫'].map(v => ({ label: v, press: () => this.press(v) }));
+
+    return {
+      overallPct: Math.min(100, (doneTotal / this.BUDGET) * 100) + '%',
+      overallDone: this.fmt(doneTotal), overallLeft: this.fmt(Math.max(0, this.BUDGET - doneTotal)),
+      steps, stepsDone,
+      ladder,
+      cumTotal: this.fmt(cumT), cumOvdp: this.fmt(cum.OVDP), cumReit: this.fmt(cum.REIT), cumCrypto: this.fmt(cum.CRYPTO),
+      cumOvdpPct: (cum.OVDP / cumT) * 100 + '%', cumReitPct: (cum.REIT / cumT) * 100 + '%', cumCryptoPct: (cum.CRYPTO / cumT) * 100 + '%',
+      sheetOpen: this.state.sheetOpen,
+      sheetLabel: sm.label, sheetColor: sm.color, sheetIcon: sm.icon, sheetTileBg: sm.tileBg,
+      sheetAmountFmt: this.fmt(amt),
+      sheetShowMaturity: sk === 'OVDP', sheetShowTicker: sk === 'CRYPTO',
+      sheetConfirmLabel: 'Зафіксувати ' + this.fmt(amt),
+      keys,
+      closeSheet: this.closeSheet, confirmSheet: this.confirmSheet
+    };
+  }
+}
+</script>
+</body>
+</html>

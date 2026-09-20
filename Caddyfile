@@ -1,0 +1,36 @@
+# TLS handles Cloudflare at the edge — Caddy runs plain HTTP internally.
+:80 {
+	handle /api/* {
+		header Cache-Control "no-store"
+		reverse_proxy server:3000 {
+			header_up X-Forwarded-Proto "https"
+		}
+	}
+
+	handle /mono/* {
+		header Cache-Control "no-store"
+		reverse_proxy server:3000 {
+			header_up X-Forwarded-Proto "https"
+		}
+	}
+
+	# Service worker і index.html ніколи не кешуються (ні браузером, ні Cloudflare)
+	handle /sw.js {
+		header Cache-Control "no-store"
+		reverse_proxy web:80
+	}
+	handle /index.html {
+		header Cache-Control "no-store"
+		reverse_proxy web:80
+	}
+	handle /manifest.webmanifest {
+		header Cache-Control "no-store"
+		reverse_proxy web:80
+	}
+
+	handle {
+		reverse_proxy web:80
+	}
+
+	encode gzip zstd
+}

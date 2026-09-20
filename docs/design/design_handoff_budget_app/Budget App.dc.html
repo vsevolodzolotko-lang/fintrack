@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #05070c; font-family: 'Manrope', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: #F5A623; text-decoration: none; }
+  a:hover { color: #ffc55a; }
+  .noscroll::-webkit-scrollbar { display: none; }
+  @keyframes popIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+  @keyframes doneIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 28px; background: radial-gradient(1200px 700px at 50% -10%, #12151f 0%, #05070c 60%);">
+  <div style="position: relative; width: 390px; height: 844px; background: #0f1117; border-radius: 46px; border: 1px solid rgba(255,255,255,.08); box-shadow: 0 40px 90px rgba(0,0,0,.6), inset 0 0 0 6px #05070c; overflow: hidden;">
+
+    <!-- notch -->
+    <div style="position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 116px; height: 30px; background: #05070c; border-radius: 18px; z-index: 60;"></div>
+
+    <!-- ===================== DASHBOARD ===================== -->
+    <div class="noscroll" style="position: absolute; inset: 0; overflow-y: auto; padding: 0 20px calc(100px) 20px; scrollbar-width: none;">
+
+      <!-- status bar -->
+      <div style="position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; height: 54px; background: linear-gradient(#0f1117 60%, rgba(15,17,23,0)); margin: 0 -20px 0; padding: 0 26px;">
+        <span style="font-family: 'Space Grotesk'; font-weight: 600; font-size: 15px; color: #EDEFF5;">9:41</span>
+        <div style="display: flex; align-items: center; gap: 7px;">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="#EDEFF5"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="1.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1" opacity=".4"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="none" stroke="#EDEFF5" stroke-width="1.4"><path d="M1 4.2a10 10 0 0 1 14 0M3.4 6.8a6.4 6.4 0 0 1 9.2 0M6 9.4a2.7 2.7 0 0 1 4 0"/></svg>
+          <div style="display: flex; align-items: center; gap: 2px;"><div style="width: 22px; height: 11px; border: 1.4px solid rgba(237,239,245,.6); border-radius: 3px; padding: 1.5px;"><div style="width: 70%; height: 100%; background: #EDEFF5; border-radius: 1px;"></div></div><div style="width: 2px; height: 4px; background: rgba(237,239,245,.6); border-radius: 0 1px 1px 0;"></div></div>
+        </div>
+      </div>
+
+      <!-- header -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 4px;">
+        <div>
+          <div style="font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #6c7185; font-weight: 700;">Спільний бюджет</div>
+          <div style="font-size: 15px; color: #a4a9bd; font-weight: 600; margin-top: 3px;">Липень · цикл до 31-го</div>
+        </div>
+        <div style="display: flex; padding: 4px; background: #1a1d27; border-radius: 999px; border: 1px solid rgba(255,255,255,.05);">
+          <button onClick="{{ setPa }}" style="{{ sevaPill }}">Партнер A</button>
+          <button onClick="{{ setPb }}" style="{{ iraPill }}">Партнер B</button>
+        </div>
+      </div>
+
+      <!-- hero -->
+      <div style="margin-top: 22px; text-align: center;">
+        <div style="font-size: 14px; color: #a4a9bd; font-weight: 600;">Можна витратити сьогодні</div>
+        <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 78px; line-height: 1; color: #F5A623; margin-top: 10px; letter-spacing: -.02em; text-shadow: 0 6px 40px rgba(245,166,35,.28);">₴847</div>
+        <div style="font-size: 13.5px; color: #6c7185; font-weight: 600; margin-top: 12px;">Залишилось 12 днів · сьогодні вже ₴153</div>
+      </div>
+
+      <!-- warning banner -->
+      <div style="margin-top: 20px; display: flex; gap: 12px; align-items: center; padding: 14px 16px; background: rgba(239,83,80,.10); border: 1px solid rgba(239,83,80,.28); border-radius: 16px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF5350" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+        <div style="font-size: 13px; color: #f0b6b5; font-weight: 600; line-height: 1.35;">За прогнозом — перевитрата <span style="color: #EF5350; font-weight: 800;">₴420</span> до кінця циклу</div>
+      </div>
+
+      <!-- review CTA -->
+      <button onClick="{{ openReview }}" style="width: 100%; margin-top: 12px; display: flex; align-items: center; gap: 14px; padding: 16px; background: linear-gradient(100deg, #221c10, #1a1d27); border: 1px solid rgba(245,166,35,.30); border-radius: 18px; cursor: pointer; text-align: left;">
+        <div style="width: 44px; height: 44px; border-radius: 13px; background: rgba(245,166,35,.16); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8"/></svg>
+        </div>
+        <div style="flex: 1;">
+          <div style="font-size: 15px; font-weight: 700; color: #EDEFF5;">6 транзакцій на розгляді</div>
+          <div style="font-size: 12.5px; color: #8a90a2; font-weight: 600; margin-top: 2px;">Свайпни, щоб розкидати по конвертах</div>
+        </div>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      <!-- envelopes -->
+      <div style="margin-top: 26px; display: flex; align-items: baseline; justify-content: space-between;">
+        <div style="font-size: 17px; font-weight: 800; color: #EDEFF5;">Конверти</div>
+        <div style="font-size: 12.5px; color: #6c7185; font-weight: 600;">цей цикл</div>
+      </div>
+
+      <div style="margin-top: 12px; padding: 16px; background: #1a1d27; border: 1px solid rgba(255,255,255,.05); border-radius: 18px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <span style="font-size: 14.5px; font-weight: 700; color: #EDEFF5;">На життя</span>
+          <span style="font-family: 'Space Grotesk'; font-size: 14px; font-weight: 600; color: #a4a9bd;"><span style="color: #EDEFF5;">₴8 200</span> / ₴12 000</span>
+        </div>
+        <div style="margin-top: 11px; height: 9px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden;">
+          <div style="width: 68%; height: 100%; background: linear-gradient(90deg, #F5A623, #ffbe4d); border-radius: 999px;"></div>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; color: #6c7185; font-weight: 600;">Залишилось ₴3 800 · 68%</div>
+      </div>
+
+      <div style="margin-top: 12px; padding: 16px; background: #1a1d27; border: 1px solid rgba(255,255,255,.05); border-radius: 18px;">
+        <div style="display: flex; align-items: baseline; justify-content: space-between;">
+          <span style="font-size: 14.5px; font-weight: 700; color: #EDEFF5;">Розваги</span>
+          <span style="font-family: 'Space Grotesk'; font-size: 14px; font-weight: 600; color: #a4a9bd;"><span style="color: #EDEFF5;">₴3 100</span> / ₴4 000</span>
+        </div>
+        <div style="margin-top: 11px; height: 9px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden;">
+          <div style="width: 78%; height: 100%; background: linear-gradient(90deg, #EF6C6C, #ff8f8f); border-radius: 999px;"></div>
+        </div>
+        <div style="margin-top: 8px; font-size: 12px; color: #EF6C6C; font-weight: 700;">Залишилось ₴900 · майже вичерпано</div>
+      </div>
+
+      <!-- accounts -->
+      <div style="margin-top: 26px; font-size: 17px; font-weight: 800; color: #EDEFF5;">Рахунки</div>
+      <div style="margin-top: 12px; background: #1a1d27; border: 1px solid rgba(255,255,255,.05); border-radius: 18px; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 15px 16px;">
+          <div style="width: 40px; height: 40px; border-radius: 11px; background: #05060a; border: 1px solid rgba(255,255,255,.09); flex-shrink: 0;"></div>
+          <div style="flex: 1;"><div style="font-size: 14.5px; font-weight: 700; color: #EDEFF5;">Чорна картка</div><div style="font-size: 12px; color: #6c7185; font-weight: 600; margin-top: 1px;">•• 4417</div></div>
+          <div style="font-family: 'Space Grotesk'; font-size: 16px; font-weight: 700; color: #EDEFF5;">₴23 400</div>
+        </div>
+        <div style="height: 1px; background: rgba(255,255,255,.05); margin: 0 16px;"></div>
+        <div style="display: flex; align-items: center; gap: 14px; padding: 15px 16px;">
+          <div style="width: 40px; height: 40px; border-radius: 11px; background: linear-gradient(135deg, #F5A623, #d98a10); flex-shrink: 0;"></div>
+          <div style="flex: 1;"><div style="font-size: 14.5px; font-weight: 700; color: #EDEFF5;">Спільний рахунок</div><div style="font-size: 12px; color: #6c7185; font-weight: 600; margin-top: 1px;">Банка · Партнер A + Партнер B</div></div>
+          <div style="font-family: 'Space Grotesk'; font-size: 16px; font-weight: 700; color: #EDEFF5;">₴8 150</div>
+        </div>
+      </div>
+
+      <!-- donut -->
+      <div style="margin-top: 26px; font-size: 17px; font-weight: 800; color: #EDEFF5;">Витрати за категоріями</div>
+      <div style="margin-top: 12px; padding: 20px 16px; background: #1a1d27; border: 1px solid rgba(255,255,255,.05); border-radius: 18px; display: flex; align-items: center; gap: 18px;">
+        <div style="position: relative; width: 132px; height: 132px; flex-shrink: 0; border-radius: 50%; background: conic-gradient(#F5A623 0 40.4%, #4FC3C6 40.4% 60.6%, #7C83FF 60.6% 74.1%, #EF6C6C 74.1% 91.4%, #4b5163 91.4% 100%);">
+          <div style="position: absolute; inset: 17px; border-radius: 50%; background: #1a1d27; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="font-family: 'Space Grotesk'; font-size: 19px; font-weight: 700; color: #EDEFF5;">₴10 400</div>
+            <div style="font-size: 10.5px; color: #6c7185; font-weight: 600; margin-top: 1px;">за цикл</div>
+          </div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 11px;">
+          <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #F5A623;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">Продукти</span><span style="font-family: 'Space Grotesk'; font-size: 13px; font-weight: 600; color: #EDEFF5;">₴4 200</span></div>
+          <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #4FC3C6;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">Кафе</span><span style="font-family: 'Space Grotesk'; font-size: 13px; font-weight: 600; color: #EDEFF5;">₴2 100</span></div>
+          <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #7C83FF;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">Покупки</span><span style="font-family: 'Space Grotesk'; font-size: 13px; font-weight: 600; color: #EDEFF5;">₴1 800</span></div>
+          <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #EF6C6C;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">Транспорт</span><span style="font-family: 'Space Grotesk'; font-size: 13px; font-weight: 600; color: #EDEFF5;">₴1 400</span></div>
+          <div style="display: flex; align-items: center; gap: 9px;"><span style="width: 9px; height: 9px; border-radius: 3px; background: #4b5163;"></span><span style="flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6;">Інше</span><span style="font-family: 'Space Grotesk'; font-size: 13px; font-weight: 600; color: #EDEFF5;">₴900</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===================== PLACEHOLDER (other tabs) ===================== -->
+    <sc-if value="{{ showStub }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #0f1117; z-index: 40; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 40px; text-align: center; animation: popIn .2s ease;">
+        <div style="width: 66px; height: 66px; border-radius: 20px; background: #1a1d27; border: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: center;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#F5A623" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </div>
+        <div style="font-size: 20px; font-weight: 800; color: #EDEFF5;">{{ stubTitle }}</div>
+        <div style="font-size: 14px; color: #8a90a2; font-weight: 600; max-width: 220px; line-height: 1.4;">Цей екран у розробці. Зараз готові Дашборд і розгляд транзакцій.</div>
+      </div>
+    </sc-if>
+
+    <!-- ===================== REVIEW OVERLAY ===================== -->
+    <sc-if value="{{ reviewOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position: absolute; inset: 0; z-index: 70; background: #0b0d12; display: flex; flex-direction: column; animation: popIn .22s ease;">
+
+        <!-- review header -->
+        <div style="padding: 62px 20px 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <button onClick="{{ closeReview }}" style="width: 38px; height: 38px; border-radius: 12px; background: #1a1d27; border: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EDEFF5" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+            <div style="font-size: 15.5px; font-weight: 800; color: #EDEFF5;">Розгляд транзакцій</div>
+            <div style="font-family: 'Space Grotesk'; font-size: 14px; font-weight: 700; color: #F5A623; min-width: 38px; text-align: right;">{{ counter }}</div>
+          </div>
+          <div style="margin-top: 16px; height: 5px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden;">
+            <div style="height: 100%; background: linear-gradient(90deg, #F5A623, #ffbe4d); border-radius: 999px; transition: width .35s ease; width: {{ progressPct }};"></div>
+          </div>
+        </div>
+
+        <!-- card area -->
+        <sc-if value="{{ allDone }}" hint-placeholder-val="{{ false }}">
+          <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 0 40px; text-align: center; animation: doneIn .35s ease;">
+            <div style="width: 84px; height: 84px; border-radius: 50%; background: rgba(76,175,80,.14); border: 1px solid rgba(76,175,80,.4); display: flex; align-items: center; justify-content: center;">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <div style="font-size: 24px; font-weight: 800; color: #EDEFF5;">Готово!</div>
+            <div style="font-size: 14.5px; color: #8a90a2; font-weight: 600;">Усі транзакції розкидано по конвертах</div>
+            <button onClick="{{ closeReview }}" style="margin-top: 8px; padding: 14px 28px; background: #F5A623; color: #1a1200; font-size: 15px; font-weight: 800; border: none; border-radius: 14px; cursor: pointer;">На дашборд</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasCards }}" hint-placeholder-val="{{ false }}">
+        <div style="flex: 1; display: flex; flex-direction: column;">
+          <div style="position: relative; flex: 1; margin: 24px 24px 0;">
+            <sc-for list="{{ stack }}" as="card" hint-placeholder-count="0">
+              <div style="{{ card.stackStyle }}">
+                <div data-drag data-idx="{{ card.idx }}" onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerCancel="{{ onUp }}" style="position: relative; height: 400px; background: #1a1d27; border: 1px solid rgba(255,255,255,.07); border-radius: 26px; padding: 22px; touch-action: none; cursor: grab; overflow: hidden; box-shadow: 0 24px 50px rgba(0,0,0,.45); display: flex; flex-direction: column;">
+
+                  <!-- income top edge -->
+                  <sc-if value="{{ card.income }}" hint-placeholder-val="{{ false }}">
+                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, #4CAF50, #7fe082);"></div>
+                  </sc-if>
+
+                  <!-- hint badges -->
+                  <div data-yes style="position: absolute; top: 22px; left: 22px; padding: 8px 14px; border: 2.5px solid #4CAF50; color: #4CAF50; font-weight: 800; font-size: 15px; border-radius: 10px; transform: rotate(-14deg); opacity: 0; letter-spacing: .04em;">ПІДТВЕРДИТИ</div>
+                  <div data-no style="position: absolute; top: 22px; right: 22px; padding: 8px 14px; border: 2.5px solid #EF5350; color: #EF5350; font-weight: 800; font-size: 15px; border-radius: 10px; transform: rotate(14deg); opacity: 0; letter-spacing: .04em;">ПІЗНІШЕ</div>
+
+                  <!-- header row -->
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 34px; height: 34px; border-radius: 50%; background: {{ card.personColor }}; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 14px;">{{ card.initial }}</div>
+                    <div style="font-size: 13.5px; font-weight: 700; color: #c5c9d6;">{{ card.person }}</div>
+                    <div style="flex: 1;"></div>
+                    <div style="font-size: 13px; font-weight: 600; color: #6c7185;">{{ card.date }}</div>
+                  </div>
+
+                  <!-- center -->
+                  <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;">
+                    <div style="width: 66px; height: 66px; border-radius: 20px; background: {{ card.envBg }}; display: flex; align-items: center; justify-content: center;">
+                      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="{{ card.envColor }}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="{{ card.iconPath }}"/></svg>
+                    </div>
+                    <div style="font-size: 22px; font-weight: 800; color: #EDEFF5; text-align: center;">{{ card.merchant }}</div>
+                    <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 42px; line-height: 1; color: {{ card.amountColor }};">{{ card.amount }}</div>
+                  </div>
+
+                  <!-- suggestion -->
+                  <div style="display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.06);">
+                    <div>
+                      <div style="font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #6c7185; font-weight: 700;">Запропоновано</div>
+                      <div style="font-size: 14px; font-weight: 700; color: #EDEFF5; margin-top: 3px;">{{ card.envelope }}</div>
+                    </div>
+                    <div style="padding: 7px 13px; background: {{ card.envBg }}; color: {{ card.envColor }}; border-radius: 999px; font-size: 12.5px; font-weight: 800;">{{ card.envelope }}</div>
+                  </div>
+
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <!-- action buttons -->
+          <div style="display: flex; align-items: center; justify-content: center; gap: 26px; padding: 22px 24px 30px;">
+            <button onClick="{{ actNo }}" style="width: 62px; height: 62px; border-radius: 50%; background: #1a1d27; border: 1.5px solid rgba(239,83,80,.4); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#EF5350" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+            <div style="font-size: 12px; color: #6c7185; font-weight: 700; text-align: center; min-width: 70px;">Свайп або тап</div>
+            <button onClick="{{ actYes }}" style="width: 62px; height: 62px; border-radius: 50%; background: rgba(76,175,80,.14); border: 1.5px solid rgba(76,175,80,.5); display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            </button>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+    </sc-if>
+
+    <!-- ===================== TAB BAR ===================== -->
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 55; height: 88px; padding: 0 22px 20px; display: flex; align-items: center; justify-content: space-between; background: linear-gradient(rgba(15,17,23,0), #0f1117 42%); backdrop-filter: blur(6px);">
+      <button onClick="{{ goDash }}" style="background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 60px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{ dashColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5M5 9.5V20h14V9.5"/></svg>
+        <span style="font-size: 10.5px; font-weight: 700; color: {{ dashColor }};">Дашборд</span>
+      </button>
+      <button onClick="{{ goSpend }}" style="background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 60px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{ spendColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+        <span style="font-size: 10.5px; font-weight: 700; color: {{ spendColor }};">Витрати</span>
+      </button>
+      <button onClick="{{ openReview }}" style="background: linear-gradient(135deg, #F5A623, #e08c0f); border: none; cursor: pointer; width: 58px; height: 58px; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 26px rgba(245,166,35,.4); transform: translateY(-6px);">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1a1200" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <button onClick="{{ goSettings }}" style="background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 60px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{ setColor }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span style="font-size: 10.5px; font-weight: 700; color: {{ setColor }};">Налашт.</span>
+      </button>
+    </div>
+
+    <!-- home indicator -->
+    <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 128px; height: 5px; background: rgba(255,255,255,.28); border-radius: 999px; z-index: 80;"></div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 446, &quot;height&quot;: 900}}">
+class Component extends DCLogic {
+  state = { tab: 'dash', reviewOpen: false, person: 'pa', cards: [], total: 6 };
+
+  ICONS = {
+    cart: 'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0',
+    coffee: 'M2 8h16v8a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z M18 8h2a3 3 0 0 1 0 6h-2 M6 2v3 M10 2v3 M14 2v3',
+    car: 'M3 17h18 M5 17a2 2 0 1 0 4 0 M15 17a2 2 0 1 0 4 0 M4.5 13l1.5-5.5h12L19.5 13 M4 13h16v4H4z',
+    film: 'M2 3h20v18H2z M7 3v18 M17 3v18 M2 8h5 M17 8h5 M2 16h5 M17 16h5',
+    box: 'M12 2 3 7v10l9 5 9-5V7z M3 7l9 5 9-5 M12 12v10',
+    income: 'M12 20V4 M5 11l7-7 7 7'
+  };
+
+  initial() {
+    const gold = { envColor: '#F5A623', envBg: 'rgba(245,166,35,.14)' };
+    const coral = { envColor: '#EF6C6C', envBg: 'rgba(239,108,108,.14)' };
+    const green = { envColor: '#4CAF50', envBg: 'rgba(76,175,80,.16)' };
+    const pa = { person: 'Партнер A', personColor: '#5B8DEF', initial: 'С' };
+    const pb = { person: 'Партнер B', personColor: '#E86BA5', initial: 'І' };
+    const exp = '#EF5350';
+    return [
+      { id: 1, merchant: 'Сільпо', amount: '−₴642', date: 'Сьогодні', ...pb, envelope: 'На життя', ...gold, iconPath: this.ICONS.cart, amountColor: exp, income: false },
+      { id: 2, merchant: 'Кав’ярня Світ', amount: '−₴145', date: 'Сьогодні', ...pb, envelope: 'Розваги', ...coral, iconPath: this.ICONS.coffee, amountColor: exp, income: false },
+      { id: 3, merchant: 'Bolt', amount: '−₴128', date: 'Вчора', ...pa, envelope: 'На життя', ...gold, iconPath: this.ICONS.car, amountColor: exp, income: false },
+      { id: 4, merchant: 'Зарплата', amount: '+₴42 000', date: '1 лип', ...pa, envelope: 'Дохід', ...green, iconPath: this.ICONS.income, amountColor: '#4CAF50', income: true },
+      { id: 5, merchant: 'Netflix', amount: '−₴259', date: 'Вчора', ...pa, envelope: 'Розваги', ...coral, iconPath: this.ICONS.film, amountColor: exp, income: false },
+      { id: 6, merchant: 'Нова Пошта', amount: '−₴90', date: '2 дні тому', ...pa, envelope: 'На життя', ...gold, iconPath: this.ICONS.box, amountColor: exp, income: false }
+    ];
+  }
+
+  topEl() { return document.querySelector('[data-drag][data-idx="0"]'); }
+
+  fly(el, dir) {
+    if (!el || el._flying) return;
+    el._flying = true;
+    el.style.transition = 'transform .34s ease-in, opacity .34s ease-in';
+    el.style.transform = `translate(${dir * 560}px, -50px) rotate(${dir * 22}deg)`;
+    el.style.opacity = '0';
+    setTimeout(() => this.setState(s => ({ cards: s.cards.slice(1) })), 300);
+  }
+
+  setBadges(el, dx) {
+    const y = el.querySelector('[data-yes]'); const n = el.querySelector('[data-no]');
+    if (y) y.style.opacity = Math.max(0, Math.min(1, dx / 90));
+    if (n) n.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+  }
+
+  onDown = (e) => {
+    if (e.currentTarget.dataset.idx !== '0') return;
+    const el = e.currentTarget;
+    try { el.setPointerCapture(e.pointerId); } catch (_) {}
+    this.drag = { el, x: e.clientX, y: e.clientY, dx: 0 };
+    el.style.transition = 'none'; el.style.cursor = 'grabbing';
+  };
+  onMove = (e) => {
+    if (!this.drag) return;
+    const { el, x, y } = this.drag;
+    const dx = e.clientX - x, dy = e.clientY - y;
+    this.drag.dx = dx;
+    el.style.transform = `translate(${dx}px, ${dy * 0.35}px) rotate(${dx * 0.05}deg)`;
+    this.setBadges(el, dx);
+  };
+  onUp = (e) => {
+    if (!this.drag) return;
+    const { el, dx } = this.drag; this.drag = null;
+    el.style.cursor = 'grab';
+    if (dx > 95) this.fly(el, 1);
+    else if (dx < -95) this.fly(el, -1);
+    else {
+      el.style.transition = 'transform .32s cubic-bezier(.2,.8,.3,1)';
+      el.style.transform = ''; this.setBadges(el, 0);
+    }
+  };
+
+  actYes = () => this.fly(this.topEl(), 1);
+  actNo = () => this.fly(this.topEl(), -1);
+
+  openReview = () => this.setState({ reviewOpen: true, cards: this.initial(), total: 6 });
+  closeReview = () => this.setState({ reviewOpen: false, tab: 'dash' });
+  goDash = () => this.setState({ tab: 'dash', reviewOpen: false });
+  goSpend = () => this.setState({ tab: 'spend', reviewOpen: false });
+  goSettings = () => this.setState({ tab: 'settings', reviewOpen: false });
+
+  renderVals() {
+    const t = this.state.tab;
+    const cards = this.state.cards;
+    const done = this.state.total - cards.length;
+    const activePill = { padding: '7px 15px', border: 'none', borderRadius: '999px', fontFamily: 'Manrope', fontSize: '13px', fontWeight: 800, cursor: 'pointer', background: 'rgba(245,166,35,.18)', color: '#F5A623' };
+    const idlePill = { padding: '7px 15px', border: 'none', borderRadius: '999px', fontFamily: 'Manrope', fontSize: '13px', fontWeight: 700, cursor: 'pointer', background: 'transparent', color: '#8a90a2' };
+    const stack = cards.slice(0, 3).map((c, i) => ({
+      ...c,
+      idx: i,
+      stackStyle: {
+        position: 'absolute', top: '0', left: '0', right: '0',
+        transformOrigin: 'top center',
+        transform: i === 0 ? 'none' : `translateY(${i * 12}px) scale(${1 - i * 0.045})`,
+        zIndex: 40 - i,
+        opacity: i === 0 ? 1 : (i === 1 ? 0.9 : 0.75),
+        pointerEvents: i === 0 ? 'auto' : 'none',
+        transition: 'transform .3s cubic-bezier(.2,.8,.3,1)'
+      }
+    }));
+    return {
+      reviewOpen: this.state.reviewOpen,
+      showStub: t !== 'dash',
+      stubTitle: t === 'spend' ? 'Витрати' : 'Налаштування',
+      stack,
+      hasCards: cards.length > 0,
+      allDone: cards.length === 0,
+      counter: `${done}/${this.state.total}`,
+      progressPct: `${(done / this.state.total) * 100}%`,
+      openReview: this.openReview, closeReview: this.closeReview,
+      goDash: this.goDash, goSpend: this.goSpend, goSettings: this.goSettings,
+      onDown: this.onDown, onMove: this.onMove, onUp: this.onUp,
+      actYes: this.actYes, actNo: this.actNo,
+      setPa: () => this.setState({ person: 'pa' }),
+      setPb: () => this.setState({ person: 'pb' }),
+      sevaPill: this.state.person === 'pa' ? activePill : idlePill,
+      iraPill: this.state.person === 'pb' ? activePill : idlePill,
+      dashColor: t === 'dash' && !this.state.reviewOpen ? '#F5A623' : '#5b6070',
+      spendColor: t === 'spend' ? '#F5A623' : '#5b6070',
+      setColor: t === 'settings' ? '#F5A623' : '#5b6070'
+    };
+  }
+}
+</script>
+</body>
+</html>

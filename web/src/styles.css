@@ -1,0 +1,1370 @@
+:root {
+  --bg: #0f1117;
+  --bg-deep: #05070c;
+  --card: #1a1d27;
+  --card-inset: #1e222e;
+  --gold: #F5A623;
+  --gold-lt: #ffbe4d;
+  --green: #4CAF50;
+  --teal: #4FC3C6;
+  --red: #EF5350;
+  --income: #4CAF50;
+  --income-lt: #7fe082;
+  --expense: #EF5350;
+  --coral: #EF6C6C;
+  --text: #EDEFF5;
+  --text-muted: #a4a9bd;
+  --text-dim: #6c7185;
+  --tab-idle: #5b6070;
+  --person-a: #5B8DEF;
+  --person-b: #E86BA5;
+  --hairline: rgba(255,255,255,.05);
+  --r-card: 18px;
+  --r-inset: 13px;
+  --r-swipe: 26px;
+  --r-fab: 20px;
+  --app-max: 480px; /* phone-first layout: cap the column on tablet/desktop */
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Layout */
+.app { display: flex; flex-direction: column; min-height: 100dvh; position: relative; overflow: hidden; }
+.content {
+  flex: 1;
+  overflow-y: auto;
+  /* side padding grows past 20px to center a --app-max column;
+     keeps .content full-width so the wheel scrolls from anywhere */
+  padding: 0 max(20px, calc((100% - var(--app-max)) / 2)) calc(100px + env(safe-area-inset-bottom));
+  scrollbar-width: none;
+}
+.content::-webkit-scrollbar { display: none; }
+.center { display: grid; place-items: center; min-height: 100dvh; padding: 20px; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  padding: 16px;
+}
+
+/* Section header */
+.section-h {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-top: 26px; margin-bottom: 12px;
+}
+.section-h h2 { font-size: 17px; font-weight: 800; margin: 0; }
+.section-h span { font-size: 12.5px; color: var(--text-dim); font-weight: 600; }
+
+/* Hero */
+.hero { text-align: center; padding: 22px 0; }
+.hero-label { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+.hero-num {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 78px;
+  line-height: 1;
+  color: var(--gold);
+  margin-top: 10px;
+  letter-spacing: -.02em;
+  text-shadow: 0 6px 40px rgba(245,166,35,.28);
+}
+.hero-num.neg { color: var(--expense); text-shadow: none; }
+.hero-sub { font-size: 13.5px; color: var(--text-dim); font-weight: 600; margin-top: 12px; }
+
+/* Warning banner */
+.warn-banner {
+  display: flex; gap: 12px; align-items: center;
+  padding: 14px 16px;
+  background: rgba(239,83,80,.10);
+  border: 1px solid rgba(239,83,80,.28);
+  border-radius: 16px;
+}
+.warn-banner-text { font-size: 13px; color: #f0b6b5; font-weight: 600; line-height: 1.35; }
+
+/* Review CTA button */
+.review-cta {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px;
+  background: linear-gradient(100deg, #221c10, #1a1d27);
+  border: 1px solid rgba(245,166,35,.30);
+  border-radius: var(--r-card);
+  cursor: pointer; text-align: left;
+  width: 100%;
+}
+.review-cta-icon {
+  width: 44px; height: 44px; border-radius: 13px;
+  background: rgba(245,166,35,.16);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.review-cta-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.review-cta-sub { font-size: 12.5px; color: var(--text-dim); font-weight: 600; margin-top: 2px; }
+
+/* Envelope bars */
+.env-header { display: flex; align-items: baseline; justify-content: space-between; }
+.env-name { font-size: 14.5px; font-weight: 700; }
+.env-amounts { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 14px; font-weight: 600; color: var(--text-muted); }
+.env-amounts-spent { color: var(--text); }
+.env-track { margin-top: 11px; height: 9px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; position: relative; }
+.env-fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+.env-tick { position: absolute; top: 0; bottom: 0; width: 2px; transform: translateX(-50%); background: rgba(255,255,255,.35); border-radius: 1px; }
+.env-caption { margin-top: 8px; font-size: 12px; font-weight: 600; color: var(--text-dim); }
+.env-caption-warn { margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--coral); }
+
+/* Accounts */
+.account-row { display: flex; align-items: center; gap: 14px; padding: 15px 16px; }
+.account-thumb { width: 40px; height: 40px; border-radius: 11px; flex-shrink: 0; }
+.account-name { font-size: 14.5px; font-weight: 700; }
+.account-sub { font-size: 12px; color: var(--text-dim); font-weight: 600; margin-top: 1px; }
+.account-balance { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 16px; font-weight: 700; }
+.divider { height: 1px; background: var(--hairline); margin: 0 16px; }
+
+/* Tab bar */
+.tabbar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: var(--app-max); z-index: 55;
+  height: calc(88px + env(safe-area-inset-bottom));
+  padding: 0 22px calc(20px + env(safe-area-inset-bottom));
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(rgba(15,17,23,0), #0f1117 42%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  width: 60px; padding: 4px 0; color: var(--tab-idle);
+}
+.tab-btn.active { color: var(--gold); }
+.tab-btn span { font-size: 10.5px; font-weight: 700; }
+.fab-btn {
+  background: linear-gradient(135deg, #F5A623, #e08c0f);
+  border: none; cursor: pointer;
+  width: 58px; height: 58px; border-radius: var(--r-fab);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 26px rgba(245,166,35,.4);
+  transform: translateY(-6px);
+}
+
+/* Donut chart */
+.donut-section { display: flex; align-items: center; gap: 18px; }
+.donut-wrap { position: relative; width: 132px; height: 132px; flex-shrink: 0; }
+.donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none;
+}
+.donut-center-amount {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 19px; font-weight: 700;
+}
+.donut-center-label { font-size: 10.5px; color: var(--text-dim); font-weight: 600; margin-top: 1px; }
+.donut-legend { flex: 1; display: flex; flex-direction: column; gap: 11px; }
+.donut-legend-row { display: flex; align-items: center; gap: 9px; }
+.donut-legend-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.donut-legend-name { flex: 1; font-size: 13px; font-weight: 600; color: #c5c9d6; }
+.donut-legend-amount {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 13px; font-weight: 600;
+}
+
+/* Review overlay */
+.review-overlay {
+  position: fixed; inset: 0; z-index: 70;
+  background: var(--bg-deep);
+  display: flex; flex-direction: column;
+  animation: popIn .22s ease;
+}
+.review-header {
+  padding: calc(62px + env(safe-area-inset-top)) 20px 0;
+  width: 100%; max-width: var(--app-max); margin: 0 auto;
+}
+.review-header-row { display: flex; align-items: center; justify-content: space-between; }
+.review-close {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: var(--card); border: 1px solid var(--hairline);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.review-title { font-size: 15.5px; font-weight: 800; }
+.review-counter {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 14px; font-weight: 700; color: var(--gold); min-width: 38px; text-align: right;
+}
+.review-progress { margin-top: 16px; height: 5px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; }
+.review-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-lt));
+  border-radius: 999px; transition: width .35s ease;
+}
+
+/* Radial sheet — колесо для однієї транзакції */
+.radial-sheet {
+  position: fixed; inset: 0; z-index: 85;
+  background: var(--bg-deep);
+  display: flex; flex-direction: column;
+  animation: popIn .22s ease;
+}
+.radial-sheet-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px;
+  width: 100%; max-width: var(--app-max);
+  margin: 0 auto;
+  padding: calc(18px + env(safe-area-inset-top)) 20px 0;
+}
+.radial-sheet-title { font-size: 16px; font-weight: 800; }
+.radial-tech {
+  width: 100%; max-width: var(--app-max);
+  margin: 0 auto;
+  padding: 0 20px calc(16px + env(safe-area-inset-bottom));
+}
+.radial-tech summary {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 10px 0;
+}
+
+.person-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 14px; flex-shrink: 0;
+}
+
+/* Бейдж «хто платив» у списку транзакцій; кольори персон стабільні за порядком у /api/users */
+.person-badge {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  font-size: 12px; font-weight: 800;
+  font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+}
+.person-badge.p0 { background: rgba(91,141,239,.18); color: #9dbcff; }
+.person-badge.p1 { background: rgba(232,107,165,.18); color: #f19cc4; }
+.person-badge.unassigned {
+  background: rgba(255,255,255,.04);
+  color: var(--text-dim);
+  border: 1.5px dashed rgba(255,255,255,.16);
+}
+
+/* Done state */
+.review-done {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 18px;
+  padding: 0 40px; text-align: center; animation: doneIn .35s ease;
+}
+.review-done-circle {
+  width: 84px; height: 84px; border-radius: 50%;
+  background: rgba(76,175,80,.14); border: 1px solid rgba(76,175,80,.4);
+  display: flex; align-items: center; justify-content: center;
+}
+.review-done-title { font-size: 24px; font-weight: 800; }
+.review-done-sub { font-size: 14.5px; color: var(--text-muted); font-weight: 600; }
+.review-done-btn {
+  margin-top: 8px; padding: 14px 28px;
+  background: var(--gold); color: #1a1200;
+  font-size: 15px; font-weight: 800;
+  border: none; border-radius: 14px; cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+}
+
+/* Stub screen */
+.stub-screen {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px; padding: 40px; text-align: center;
+}
+.stub-icon {
+  width: 66px; height: 66px; border-radius: 20px;
+  background: var(--card); border: 1px solid var(--hairline);
+  display: flex; align-items: center; justify-content: center;
+}
+.stub-title { font-size: 20px; font-weight: 800; margin: 0; }
+.stub-sub { font-size: 14px; color: var(--text-dim); font-weight: 600; max-width: 220px; line-height: 1.4; margin: 0; }
+
+/* Form elements */
+input, select, textarea {
+  font: inherit; color: var(--text);
+  background: var(--card-inset); border: 1px solid rgba(255,255,255,.06); border-radius: var(--r-inset);
+  padding: 11px 12px; width: 100%;
+}
+select { min-width: 140px; width: auto; }
+label { display: block; font-size: 13px; color: var(--text-muted); margin: 10px 0 4px; }
+input:focus, select:focus { outline: none; border-color: var(--gold); }
+input::placeholder { color: var(--text-dim); }
+
+button { font: inherit; cursor: pointer; }
+.btn-primary {
+  background: var(--gold); color: #1a1200;
+  border: none; border-radius: 12px; padding: 13px 20px;
+  font-weight: 700; width: 100%; font-size: 15px;
+}
+.btn-link { background: none; border: none; color: var(--gold); padding: 4px 8px; }
+.btn-small { width: auto; padding: 8px 12px; }
+.btn-danger { color: var(--expense) !important; }
+
+/* Auth */
+.auth-card { max-width: 340px; width: 100%; display: flex; flex-direction: column; gap: 12px; }
+.auth-card h1 { margin: 0 0 4px; text-align: center; font-size: 28px; }
+.auth-sub { font-size: 14px; color: var(--text-muted); text-align: center; margin: 0; }
+
+/* Settings */
+.settings-section { display: flex; flex-direction: column; gap: 12px; padding: 16px 20px calc(100px + env(safe-area-inset-bottom)); }
+.settings-section h3 { font-size: 15px; font-weight: 700; margin: 0 0 10px; }
+
+/* Utility */
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; align-items: center; }
+.between { justify-content: space-between; }
+.gap-8 { gap: 8px; }
+.mt-12 { margin-top: 12px; }
+.mt-8 { margin-top: 8px; }
+.small { font-size: 13px; }
+.muted { color: var(--text-muted); }
+.pos { color: var(--income); }
+.neg { color: var(--expense); }
+.mono { font-family: 'Space Grotesk', system-ui, sans-serif; }
+
+/* Transactions page */
+.tx-card { display: flex; flex-direction: column; gap: 10px; }
+.tx-desc { font-size: 14px; font-weight: 700; }
+.tx-meta { font-size: 12px; color: var(--text-dim); font-weight: 600; margin-top: 2px; }
+.tx-amount { font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 15px; font-weight: 700; }
+.tx-review-border { border-color: rgba(245,166,35,.25); }
+
+/* Список Витрат: рядок, що сканується, замість двох селектів на картку */
+.txseg {
+  display: flex; gap: 6px;
+  padding: 4px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+.txseg-btn {
+  flex: 1; padding: 9px 6px;
+  background: transparent; border: none;
+  border-radius: 999px;
+  font-family: inherit; font-size: 13px; font-weight: 800;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .16s ease, color .16s ease;
+  /* 4 сегменти на 375px: підпис «Нічиї» не мусить переноситись рядком —
+     горизонтальний паддінг звужений, а не шрифт (шрифт лишається за шкалою). */
+  white-space: nowrap;
+}
+.txseg-btn.active { background: var(--gold); color: #1a1200; }
+.txday {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding: 16px 2px 8px;
+}
+.txday-label {
+  font-size: 11px; font-weight: 800;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--text-dim);
+}
+.txday-total {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px; font-weight: 700; color: var(--text-muted);
+}
+.txrow {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  margin-bottom: 8px;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+.txrow-glyph {
+  width: 34px; height: 34px; flex: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.txrow-glyph.unknown {
+  border: 1.5px dashed rgba(255,255,255,.2);
+  color: var(--text-dim);
+  font-weight: 800; font-size: 15px;
+}
+.txrow-body { flex: 1; min-width: 0; }
+.txrow-merchant {
+  /* span за розміткою; без display:block рядки зливаються в один інлайновий
+     потік і назва наїжджає на суму замість переносу під неї. */
+  display: block;
+  font-size: 14px; font-weight: 700; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.txrow-meta {
+  display: block;
+  font-size: 12px; font-weight: 600; color: var(--text-dim);
+  margin-top: 2px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.txrow-right { display: flex; align-items: center; gap: 8px; flex: none; }
+.txrow-amount {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 15px; font-weight: 700;
+}
+.txrow-dot { width: 6px; height: 6px; border-radius: 50%; flex: none; }
+
+/* Фільтр за конвертом — рідкісний, тому згорнутий, а не постійний ряд
+   контролів над списком (той самий принцип, що й «Технічні дані» в шиті). */
+.txfilters { margin: 4px 0 8px; }
+.txfilters summary {
+  font-size: 12px; font-weight: 700;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 10px 2px;
+}
+.txfilters select { margin-top: 8px; }
+
+.filters { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.chip {
+  background: rgba(255,255,255,.06); padding: 4px 10px;
+  border-radius: 20px; font-size: 12px; color: var(--text-muted);
+}
+
+/* Animations */
+@keyframes popIn { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: scale(1); } }
+@keyframes doneIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ptr-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes sugPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,166,35,.45); }
+  50% { box-shadow: 0 0 0 5px rgba(245,166,35,0); }
+}
+
+/* Category wheel */
+.wheel-loading {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  color: var(--text-dim); font-size: 14px; font-weight: 600;
+}
+
+/* Radial categorizer */
+/* Сцена — фіксований бокс 375×420 у координатах геометрії, масштабується
+   цілком через --radial-k. Так SVG і DOM-пак їдуть разом, а піксельна
+   математика жесту лишається в координатах сцени. */
+.radial-stage {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  min-height: 0;
+  touch-action: none;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.radial-box {
+  position: relative;
+  width: 375px;
+  height: 420px;
+  flex: none;
+  transform: scale(var(--radial-k, 1));
+  transform-origin: 50% 50%;
+}
+.radial-ambient {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 400px; height: 400px;
+  margin: -200px 0 0 -200px;
+  border-radius: 50%;
+  pointer-events: none;
+  transition: background .16s ease;
+}
+.radial-svg { position: absolute; inset: 0; }
+.radial-wedge {
+  transition: fill .16s ease, stroke .16s ease, filter .16s ease, transform .18s cubic-bezier(.2,.8,.3,1);
+  /* Клини намальовані в абсолютних координатах viewBox (без батьківського
+     translate), тому центр кільця — це буквально 187.5px 210px. */
+  transform-origin: 187.5px 210px;
+  cursor: pointer;
+}
+/* Гліфи секторів — DOM поверх SVG, а не <foreignObject>: у WebKit
+   foreignObject має відомі проблеми з трансформаціями й клікабельністю, а
+   позиціювати 7 іконок абсолютно не складніше. */
+.radial-glyph {
+  position: absolute;
+  width: 32px; height: 32px;
+  margin: -16px 0 0 -16px;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+  transition: color .13s ease, transform .13s ease, opacity .13s ease;
+}
+.radial-leaf-label {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: .01em;
+  white-space: nowrap;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+  transition: fill .13s ease, transform .13s ease, opacity .13s ease;
+}
+.radial-banner {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  font-size: 15px; font-weight: 800;
+  white-space: nowrap; text-align: center;
+  transition: color .15s ease;
+  z-index: 4; pointer-events: none;
+}
+.radial-hub {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 124px; height: 124px;      /* 2 × rHub */
+  margin: -62px 0 0 -62px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow: 0 18px 40px rgba(0,0,0,.5);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 4px; padding: 14px;
+  text-align: center;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  overflow: hidden;
+  z-index: 10;
+  animation: hubIn .26s cubic-bezier(.2,.8,.3,1);
+  transition: background .12s ease, border-color .12s ease, box-shadow .12s ease;
+}
+.radial-hub:active { cursor: grabbing; }
+@keyframes hubIn {
+  from { transform: scale(.84); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+.radial-hub-merchant {
+  font-size: 13px; font-weight: 800;
+  overflow-wrap: anywhere; max-width: 100%;
+  transition: opacity .12s ease;
+}
+.radial-hub-amount {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700; font-size: 26px; line-height: 1;
+  color: var(--expense);
+  transition: font-size .12s ease, color .12s ease;
+}
+.radial-hub-when {
+  font-size: 11px; font-weight: 600; color: var(--text-dim);
+  transition: opacity .12s ease;
+}
+.radial-pile {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 124px; height: 124px;
+  margin: -62px 0 0 -62px;
+  border-radius: 50%;
+  background: #15181f;
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 14px 28px rgba(0,0,0,.45);
+  pointer-events: none;
+  z-index: 9;
+}
+.radial-thumb {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 13px; height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 11;
+  transition: opacity .14s ease;
+}
+/* Хто платив — пігулка над колесом; hit-area 44px без зміни вигляду */
+.radial-person-row {
+  position: absolute;
+  /* Нижче банера: інакше довгий текст банера лягає на пігулку. Кільце
+     починається аж на 142px (зовнішній край клинів 1-го рівня), тож 26px
+     тут вільні. */
+  top: 26px; left: 0; right: 0;
+  display: flex; justify-content: center;
+  z-index: 5;
+}
+.radial-person-pill {
+  display: flex; gap: 5px;
+  padding: 4px;
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 999px;
+}
+.radial-person-chip {
+  position: relative;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 999px;
+  font-size: 12.5px; font-weight: 800;
+  color: var(--text-faint, #8a90a2);
+  font-family: inherit;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+.radial-person-chip::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 100%; min-width: 44px; height: 44px;
+  transform: translate(-50%, -50%);
+}
+.radial-coin {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-weight: 700;
+  will-change: transform, opacity;
+}
+.radial-compass {
+  transition: opacity .18s ease;
+  pointer-events: none;
+}
+.radial-undo-row {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; max-width: var(--app-max);
+  margin: 0 auto;
+  padding: 10px 20px;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-muted);
+}
+.radial-undo-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.radial-undo-text { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.radial-undo-btn {
+  padding: 8px 14px;
+  background: transparent; border: none;
+  color: var(--gold); font-family: inherit;
+  font-size: 13px; font-weight: 800;
+  cursor: pointer;
+}
+.radial-footer {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; max-width: var(--app-max);
+  margin: 0 auto;
+  padding: 0 20px calc(16px + env(safe-area-inset-bottom));
+}
+.radial-later {
+  flex: 1; height: 50px;
+  border-radius: 16px;
+  background: var(--card); border: 1px solid var(--hairline);
+  color: var(--text-muted); font-family: inherit;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer;
+}
+.radial-add {
+  width: 50px; height: 50px; flex: none;
+  border-radius: 16px;
+  background: var(--gold); color: #1a1200;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 26px rgba(245,166,35,.4);
+  cursor: pointer;
+}
+
+/* New-category sheet */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-backdrop {
+  position: fixed; inset: 0; z-index: 80;
+  background: rgba(0,0,0,.55);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: fadeIn .18s ease;
+}
+.sheet {
+  width: 100%; max-width: var(--app-max);
+  background: var(--card);
+  border-top-left-radius: 22px; border-top-right-radius: 22px;
+  border: 1px solid var(--hairline);
+  padding: 22px 20px calc(22px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 14px;
+  animation: sheetUp .26s cubic-bezier(.2,.8,.3,1);
+}
+.sheet-title { font-size: 17px; font-weight: 800; }
+.sheet-input {
+  width: 100%;
+  padding: 13px 14px;
+  font-size: 15px; font-weight: 600;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  outline: none;
+}
+.sheet-input:focus { border-color: var(--gold); }
+.sheet-seg { display: flex; gap: 8px; }
+.sheet-seg-btn {
+  flex: 1;
+  padding: 11px 6px;
+  font-size: 13px; font-weight: 700;
+  color: var(--text-dim);
+  background: var(--bg);
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  cursor: pointer;
+}
+.sheet-seg-btn.active {
+  color: #1a1200;
+  background: var(--gold);
+  border-color: var(--gold);
+}
+.radial-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.radial-slot-btn {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  min-height: 60px;
+  padding: 8px 4px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 11px; font-weight: 800;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, color .16s ease;
+}
+.sheet-actions { display: flex; gap: 10px; margin-top: 4px; }
+.sheet-btn {
+  flex: 1;
+  padding: 14px;
+  font-size: 15px; font-weight: 800;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+  border: none;
+}
+.sheet-btn.ghost { background: rgba(255,255,255,.06); color: var(--text); }
+.sheet-btn.primary { background: var(--gold); color: #1a1200; }
+.sheet-btn.primary:disabled { opacity: .45; cursor: default; }
+
+/* Category manager (Settings) */
+.cat-manager { display: flex; flex-direction: column; gap: 4px; }
+.cat-manager h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+.cat-manager-hint { margin: 0 0 8px; font-size: 12.5px; color: var(--text-muted); line-height: 1.4; }
+.cat-manager-list { display: flex; flex-direction: column; }
+.cat-manager-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-top: 1px solid var(--hairline);
+}
+.cat-manager-row:first-child { border-top: none; }
+.cat-manager-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.cat-manager-name { flex: 1; font-size: 14.5px; font-weight: 700; color: var(--text); }
+.cat-manager-env { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+.cat-del-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; flex-shrink: 0;
+  background: none; border: none; border-radius: 9px;
+  color: var(--text-dim); cursor: pointer;
+}
+.cat-del-btn:active { background: rgba(239,83,80,.12); color: var(--expense); }
+.cat-manager-confirm { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.cat-del-yes {
+  padding: 7px 12px; border: none; border-radius: 9px; cursor: pointer;
+  background: var(--expense); color: #fff; font-size: 13px; font-weight: 800;
+  font-family: 'Manrope', sans-serif;
+}
+
+/* ─── Investments ─── */
+@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* Картка «Інвестиції цього місяця» на дашборді */
+.invest-month-card {
+  width: 100%; margin-top: 12px; padding: 16px; display: block; text-align: left;
+  background: linear-gradient(120deg, #17231a, #1a1d27 65%);
+  border: 1px solid rgba(76,175,80,.26); border-radius: 18px;
+  font-family: inherit; color: inherit; cursor: pointer;
+}
+.invest-step { padding: 16px; background: var(--card); border-radius: 18px; border: 1px solid var(--hairline); margin-top: 12px; }
+.invest-step-track { margin-top: 13px; height: 6px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; }
+
+/* Сегмент-контрол сторінки Інвестицій. Класи, а не інлайн: той самий
+   примітив згодом візьме таб «Роки» в Історії витрат. */
+.seg {
+  display: flex; gap: 4px; margin-top: 14px; padding: 4px;
+  background: #171a24; border: 1px solid rgba(255,255,255,.05); border-radius: 14px;
+}
+.seg-btn {
+  flex: 1; height: 40px; border: none; border-radius: 11px; cursor: pointer;
+  background: transparent; color: var(--text-dim);
+  font-family: inherit; font-size: 13px; font-weight: 700;
+}
+.seg-btn.active { background: rgba(245,166,35,.16); color: var(--gold); }
+
+/* Історія інвестицій. Префікс .ih-*: .hist-* належить Історії витрат. */
+.ih-summary {
+  margin-top: 16px; padding: 18px; border-radius: 20px;
+  background: #1a1d27; border: 1px solid rgba(255,255,255,.05);
+}
+.ih-summary-total {
+  font-family: 'Space Grotesk', system-ui; font-size: 30px; font-weight: 700;
+  color: var(--text); font-variant-numeric: tabular-nums; margin-top: 6px;
+}
+.ih-summary-line {
+  margin-top: 8px; font-size: 12.5px; font-weight: 600; color: var(--text-dim);
+  line-height: 1.5; font-variant-numeric: tabular-nums;
+}
+.ih-chips { display: flex; gap: 7px; margin-top: 16px; }
+.ih-chip {
+  flex: 1; height: 34px; border: 1px solid rgba(255,255,255,.06); border-radius: 11px;
+  background: #171a24; color: var(--text-dim); font-family: inherit;
+  font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.ih-chip.active { background: rgba(255,255,255,.08); color: var(--text); }
+.ih-month { margin-top: 20px; display: flex; align-items: baseline; justify-content: space-between; }
+.ih-month-name { font-size: 15px; font-weight: 800; color: var(--text); }
+.ih-month-sum { font-size: 12px; font-weight: 700; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.ih-list {
+  margin-top: 8px; background: #1a1d27; border: 1px solid rgba(255,255,255,.05);
+  border-radius: 18px; overflow: hidden;
+}
+.ih-row {
+  display: flex; align-items: center; gap: 11px; width: 100%;
+  padding: 13px 16px; min-height: 56px; background: none; border: none;
+  border-bottom: 1px solid rgba(255,255,255,.04); cursor: pointer; text-align: left;
+  font-family: inherit;
+}
+.ih-row:last-child { border-bottom: none; }
+.ih-dot { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.ih-row-main { flex: 1; min-width: 0; }
+.ih-row-title { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.ih-row-note { margin-top: 2px; font-size: 11.5px; font-weight: 600; color: var(--text-dim); }
+.ih-row-amount {
+  font-family: 'Space Grotesk', system-ui; font-size: 13.5px; font-weight: 600;
+  color: var(--text); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.ih-empty {
+  margin-top: 20px; padding: 24px; text-align: center;
+  background: #1a1d27; border: 1px dashed rgba(255,255,255,.1); border-radius: 18px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-dim); line-height: 1.5;
+}
+.invest-numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+.invest-key {
+  height: 52px; background: #1e222e; border: 1px solid rgba(255,255,255,.05); border-radius: 14px;
+  font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 21px; font-weight: 600; color: var(--text);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* Спільний шит суми */
+.amt-backdrop { position: fixed; inset: 0; z-index: 75; background: rgba(5,7,12,.6); }
+.amt-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 76;
+  max-width: var(--app-max); margin: 0 auto;
+  background: #171a24;
+  border-top: 1px solid rgba(255,255,255,.09);
+  border-radius: 26px 26px 0 0;
+  padding: 10px 22px calc(28px + env(safe-area-inset-bottom));
+  animation: sheetUp .28s cubic-bezier(.2,.8,.3,1);
+}
+.amt-grip { width: 40px; height: 5px; background: rgba(255,255,255,.18); border-radius: 999px; margin: 0 auto 16px; }
+.amt-title { font-size: 15px; font-weight: 800; color: var(--text); }
+.amt-subtitle { font-size: 12px; font-weight: 600; color: var(--text-faint, #8a90a2); margin-top: 2px; }
+.amt-value {
+  text-align: center; margin: 20px 0 6px;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700; font-size: 46px; line-height: 1;
+}
+.amt-quick { display: flex; gap: 8px; margin-top: 10px; }
+.amt-quick-btn {
+  flex: 1; padding: 9px 0; border-radius: 11px;
+  border: 1px solid var(--hairline); background: var(--card-inset);
+  color: var(--text-muted); font-family: inherit; font-size: 12.5px; font-weight: 700;
+  cursor: pointer;
+}
+.amt-error { margin-top: 10px; font-size: 12.5px; font-weight: 700; color: var(--expense); }
+/* Скасувати / підтвердити — той самий рядок, що й в інших шитах (ClosureSheet,
+   NewCategorySheet): .sheet-actions/.sheet-btn уже дають ghost+primary
+   з правильним disabled-станом, окремий .amt-confirm був би дублем. */
+.amt-sheet .sheet-actions { margin-top: 14px; }
+
+/* Покроковий внесок. Шит тієї ж родини, що AmountSheet — але кроки 1-2 без
+   нумпада, тож своя обгортка. */
+.flow-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 76;
+  max-width: var(--app-max); margin: 0 auto;
+  background: #171a24; border-top: 1px solid rgba(255,255,255,.09);
+  border-radius: 26px 26px 0 0;
+  padding: 10px 22px calc(28px + env(safe-area-inset-bottom));
+  animation: sheetUp .28s cubic-bezier(.2,.8,.3,1);
+}
+.flow-step-label { font-size: 12px; font-weight: 700; color: var(--text-dim); }
+.flow-title { margin-top: 2px; font-size: 15px; font-weight: 800; color: var(--text); }
+.flow-amount {
+  margin-top: 14px; font-family: 'Space Grotesk', system-ui;
+  font-size: 38px; font-weight: 700; line-height: 1; color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.flow-copy {
+  margin-top: 10px; min-height: 44px; padding: 0 16px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px; color: var(--text); font-family: inherit;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.flow-breakdown {
+  margin-top: 10px; font-size: 12.5px; font-weight: 600; color: var(--text-dim);
+  line-height: 1.5; font-variant-numeric: tabular-nums;
+}
+.flow-next {
+  margin-top: 16px; padding: 14px 16px; background: var(--card);
+  border: 1px solid rgba(255,255,255,.05); border-radius: 16px;
+}
+.flow-next-title { font-size: 12px; font-weight: 700; color: var(--text-dim); }
+.flow-next-row {
+  display: flex; gap: 10px; align-items: flex-start; margin-top: 10px;
+  font-size: 13px; font-weight: 600; color: #c5c9d6; line-height: 1.4;
+}
+.flow-next-num {
+  width: 20px; height: 20px; flex: none; border-radius: 7px;
+  background: rgba(255,255,255,.07); color: var(--text-dim);
+  font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.flow-done-row {
+  display: flex; gap: 9px; align-items: center; margin-top: 8px;
+  font-size: 12.5px; font-weight: 600; color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.flow-field {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 15px; margin-top: 12px; background: var(--card-inset);
+  border: 1px solid rgba(255,255,255,.06); border-radius: 13px;
+}
+.flow-field span { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.flow-field input {
+  background: transparent; border: none; color: var(--gold); font-family: inherit;
+  font-size: 13.5px; font-weight: 700; text-align: right; width: 110px; outline: none;
+}
+.flow-primary {
+  width: 100%; margin-top: 16px; min-height: 44px; padding: 14px;
+  background: var(--gold); color: #10130a; border: none; border-radius: 15px;
+  font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer;
+}
+.flow-hint { margin-top: 9px; text-align: center; font-size: 11.5px; font-weight: 600; color: var(--text-dim); }
+.flow-exit { display: flex; gap: 10px; margin-top: 12px; }
+.flow-exit button {
+  flex: 1; min-height: 44px; background: none; border: none; font-family: inherit;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.flow-close { color: #8a90a2; }
+.flow-cancel { color: var(--text-dim); }
+
+/* Конвертації без привʼязки до поповнення. Префікс .orph-*: .ih-*, .hist-*,
+   .flow-*, .seg-*, .amt-* уже зайняті. */
+.orph-title { margin-top: 16px; font-size: 13px; font-weight: 800; color: var(--text); }
+.orph-why {
+  margin-top: 4px; font-size: 11.5px; font-weight: 600; color: var(--text-dim); line-height: 1.45;
+}
+/* Модифікатор: більший відступ, коли .orph-why йде після блоку деталей
+   обміну, а не одразу після кнопок (де вистачає базових 4px). */
+.orph-why-lead { margin-top: 14px; }
+.orph-list {
+  margin-top: 8px; background: var(--card); border: 1px solid rgba(255,255,255,.05);
+  border-radius: 14px; overflow: hidden;
+}
+.orph-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px;
+  padding: 11px 16px; background: none; border: none;
+  border-bottom: 1px solid rgba(255,255,255,.04); cursor: pointer; text-align: left;
+  font-family: inherit; font-size: 11.5px; font-weight: 600; color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.orph-row:last-child { border-bottom: none; }
+.orph-group {
+  margin-top: 10px; width: 100%; min-height: 44px; padding: 0 4px;
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 700; color: var(--text-dim);
+}
+/* Скрол лише області кандидатів (знахідка 3) — той самий патерн, що
+   .help-sheet-body, але тут .orph-cand уже має свій верхній margin, тож без
+   зайвого gap. */
+.orph-cand-scroll { max-height: 60vh; overflow-y: auto; }
+.orph-cand {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 52px;
+  padding: 11px 14px; margin-top: 8px; background: var(--card-inset);
+  border: 1px solid rgba(255,255,255,.06); border-radius: 13px;
+  cursor: pointer; text-align: left; font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+.orph-cand-main { flex: 1; min-width: 0; }
+.orph-cand-when { display: block; font-size: 13px; font-weight: 700; color: var(--text); }
+.orph-cand-sub { display: block; margin-top: 2px; font-size: 11.5px; font-weight: 600; color: var(--text-dim); }
+.orph-detail {
+  display: flex; justify-content: space-between; gap: 12px; margin-top: 9px;
+  font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums;
+}
+.orph-detail span:first-child { color: var(--text-dim); font-weight: 700; }
+.orph-detail span:last-child { color: var(--text); font-weight: 700; text-align: right; }
+.orph-act {
+  width: 100%; margin-top: 12px; min-height: 44px; padding: 13px;
+  border-radius: 13px; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer;
+  border: none;
+}
+/* Головна дія («Привʼязати до поповнення») — фіолетовий акцент шита,
+   раніше інлайн-hex на самій кнопці. */
+.orph-act-primary {
+  background: #7C83FF; color: #0b0d1a;
+}
+/* Другорядна дія («Це поза трекінгом», «Знʼяти позначку») — той самий
+   нейтральний вигляд у двох місцях, тож модифікатор, а не інлайн-дубль. */
+.orph-act-ghost {
+  background: rgba(255,255,255,.05); color: var(--text); border: 1px solid rgba(255,255,255,.07);
+}
+
+/* Довідка в шиті. Раніше — поповер 30px, що накривав наступний крок. */
+.help-btn {
+  position: relative;
+  width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,.04); border: none; border-radius: 10px;
+  cursor: pointer; flex-shrink: 0;
+}
+/* Видимий розмір лишається 30px, палець отримує 44px */
+.help-btn::before {
+  content: "";
+  position: absolute; left: 50%; top: 50%;
+  width: 44px; height: 44px;
+  transform: translate(-50%, -50%);
+}
+.help-sheet-body {
+  font-size: 13px; font-weight: 600; color: #c5c9d6; line-height: 1.55;
+  max-height: 60vh; overflow-y: auto;
+}
+
+.cat-del-no {
+  padding: 7px 12px; border: 1px solid var(--hairline); border-radius: 9px; cursor: pointer;
+  background: none; color: var(--text-muted); font-size: 13px; font-weight: 700;
+  font-family: 'Manrope', sans-serif;
+}
+/* Goals card — dark theme, gold accents (matches --card surface) */
+.goals-card { display: flex; flex-direction: column; gap: 14px; }
+.goals-card h3 { margin: 0; font-size: 16px; font-weight: 800; color: var(--text); }
+.goals-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.goals-cardtag {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 600; color: var(--text-dim);
+}
+.goals-cardtag i {
+  width: 20px; height: 13px; border-radius: 3px;
+  background: linear-gradient(135deg, #f4f5f8, #d9dce6);
+  border: 1px solid rgba(255,255,255,.25);
+}
+
+.goals-total { display: flex; flex-direction: column; gap: 2px; margin-top: -4px; }
+.goals-total-label { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+.goals-total-sum {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums;
+}
+
+.goals-unalloc {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  padding: 6px 12px; border-radius: 999px;
+  background: rgba(245,166,35,.10); border: 1px solid rgba(245,166,35,.28);
+  font-size: 13px; color: var(--gold);
+}
+.goals-unalloc b {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  color: var(--gold); font-weight: 700; font-variant-numeric: tabular-nums;
+}
+.goals-unalloc .hint { opacity: 1; color: var(--text-dim); }
+.goals-unalloc.neg { background: rgba(239,83,80,.10); border-color: rgba(239,83,80,.28); }
+.goals-unalloc.neg b { color: var(--coral); }
+
+.goals-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+.goal-row { display: flex; flex-direction: column; gap: 8px; }
+.goal-row-top { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 14px; }
+.goal-row-top > span:first-child { font-weight: 700; color: var(--text); }
+.goal-row-top > span.goal-nums {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--text-muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.goal-nums b { color: var(--text); font-weight: 700; }
+.goal-bar { height: 8px; background: rgba(255,255,255,.06); border-radius: 999px; overflow: hidden; }
+.goal-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--gold), var(--gold-lt)); transition: width .45s ease; }
+.goal-bar-fill.done { background: linear-gradient(90deg, var(--green), var(--income-lt)); }
+.goal-row-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.goal-caption { font-size: 12px; font-weight: 600; color: var(--text-dim); margin-right: auto; font-variant-numeric: tabular-nums; }
+.goal-caption.done { color: var(--income-lt); font-weight: 700; }
+
+.goals-card .mini {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12.5px; font-weight: 700; font-family: 'Manrope', sans-serif;
+  padding: 6px 11px; border-radius: 999px; cursor: pointer;
+  color: var(--text); background: var(--card-inset);
+  border: 1px solid var(--hairline);
+}
+.goals-card .mini:hover { color: var(--gold); border-color: rgba(245,166,35,.35); }
+.goals-card .mini:disabled { opacity: .4; cursor: default; }
+.goals-card .mini.danger { color: var(--coral); }
+.goals-card .mini.danger:hover { color: var(--coral); border-color: rgba(239,83,80,.35); }
+
+.goal-edit { display: flex; gap: 8px; }
+.goal-edit input {
+  flex: 1; min-width: 0; padding: 10px 12px;
+  font-size: 14px; color: var(--text); background: var(--card-inset);
+  border: 1px solid rgba(255,255,255,.06); border-radius: var(--r-inset); outline: none;
+  font-family: inherit;
+}
+.goal-edit input:focus { border-color: var(--gold); }
+.goal-edit input:last-of-type { max-width: 128px; }
+
+.goals-card .divider { margin: 0; }
+.goals-new { display: flex; gap: 8px; }
+.goals-new input {
+  flex: 1; min-width: 0; padding: 10px 12px;
+  font-size: 14px; color: var(--text); background: var(--card-inset);
+  border: 1px solid rgba(255,255,255,.06); border-radius: var(--r-inset); outline: none;
+  font-family: inherit;
+}
+.goals-new input:focus { border-color: var(--gold); }
+.goals-new input:last-of-type { max-width: 128px; }
+.goals-new button {
+  flex-shrink: 0; width: 44px; display: inline-flex; align-items: center; justify-content: center;
+  background: var(--gold); color: #1a1200; border: none; border-radius: 12px; cursor: pointer;
+}
+.goals-new button:disabled { opacity: .4; cursor: default; }
+.goals-err { color: var(--coral); font-size: 13px; margin: 0; }
+
+.field-label { display: block; font-size: 0.8rem; opacity: 0.7; margin-bottom: 4px; }
+.hint { font-size: 0.8rem; opacity: 0.65; margin-top: 6px; line-height: 1.35; }
+
+/* ─── Картка надходження в Розгляді ─── */
+.income-card {
+  margin: 12px 16px;
+  padding: 18px;
+  background: var(--card);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 20px;
+}
+.income-card-head {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.income-card-kicker {
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: #4CAF50; margin-bottom: 4px;
+}
+.income-card-desc { font-size: 16px; font-weight: 700; color: var(--text); }
+.income-card-meta { font-size: 12px; font-weight: 600; color: var(--text-dim); margin-top: 2px; }
+.income-card-amount { font-size: 22px; font-weight: 800; color: #4CAF50; white-space: nowrap; }
+.income-card-q {
+  margin: 18px 0 10px; font-size: 13px; font-weight: 700; color: var(--text-dim);
+}
+.income-group { border-radius: 16px; padding: 10px; margin-bottom: 12px; }
+.income-group-gold { border: 1px solid rgba(245, 166, 35, .32); background: rgba(245, 166, 35, .06); }
+.income-group-dim { border: 1px solid rgba(255, 255, 255, .10); }
+.income-group-label {
+  font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--text-dim); padding: 2px 6px 8px;
+}
+.income-opt {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 12px; background: transparent; border: 0; border-radius: 12px;
+  text-align: left; cursor: pointer; color: var(--text);
+}
+.income-opt:active { background: rgba(255, 255, 255, .06); }
+.income-opt:disabled { opacity: .5; }
+.income-opt-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.income-opt-label { font-size: 15px; font-weight: 700; }
+.income-opt-star { margin-left: 6px; font-size: 12px; }
+.income-opt-sub { font-size: 12px; font-weight: 600; color: var(--text-dim); }
+.income-flip {
+  width: 100%; padding: 8px; background: transparent; border: 0;
+  font-size: 12px; font-weight: 700; color: var(--gold); cursor: pointer;
+}
+
+/* Вхід в історію із заголовка Витрат */
+.hist-link {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 10px;
+  background: transparent; border: none;
+  color: var(--text-dim);
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  cursor: pointer;
+}
+
+/* Стовпчики історії. Малюємо руками: штриховку неповного місяця в Recharts
+   довелося б робити кастомною фігурою, а тут це один градієнт. Recharts
+   лишається донату на дашборді. */
+.hist-chart {
+  position: relative;
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 132px;
+  padding: 0 2px;
+}
+.hist-bar {
+  flex: 1;
+  min-width: 0;
+  border-radius: 3px 3px 0 0;
+  background: var(--text-dim);
+  opacity: .45;
+  cursor: pointer;
+  transition: opacity .16s ease, background .16s ease;
+}
+.hist-bar.sel { opacity: 1; }
+.hist-bar.over { background: var(--expense); }
+/* Неповний місяць — штриховка, щоб низький стовпчик не читався як «ощадливі» */
+.hist-bar.partial {
+  background-image: repeating-linear-gradient(
+    45deg, transparent, transparent 3px,
+    rgba(255,255,255,.22) 3px, rgba(255,255,255,.22) 6px
+  );
+}
+.hist-limit {
+  position: absolute; left: 0; right: 0;
+  border-top: 1px dashed rgba(255,255,255,.35);
+  pointer-events: none;
+}
+.hist-axis {
+  display: flex; gap: 4px;
+  padding: 6px 2px 0;
+}
+.hist-axis span {
+  flex: 1; min-width: 0;
+  text-align: center;
+  font-size: 10px; font-weight: 700;
+  color: var(--text-dim);
+  overflow: hidden; white-space: nowrap;
+}
+.hist-caption {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-dim);
+  padding: 6px 2px 0;
+}
+
+.hist-month-card {
+  background: var(--card);
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.hist-month-name { font-size: 13px; font-weight: 700; color: var(--text-muted); }
+.hist-month-sum {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 28px; font-weight: 700;
+  margin-top: 2px;
+}
+.hist-month-delta { font-size: 12px; font-weight: 700; margin-top: 4px; }
+.hist-rows { display: flex; flex-direction: column; }
+.hist-row {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 2px;
+  background: transparent; border: none;
+  border-bottom: 1px solid var(--hairline);
+  font-family: inherit; text-align: left;
+  color: var(--text);
+  cursor: pointer;
+}
+/* «Повернення» й «Без категорії» рендеряться disabled (нема categoryId — нема
+   куди тапати). Без явного color тут браузер підставляє свій колір :disabled
+   кнопки, і на темному тлі текст стає нечитним — той самий інваріант, що й у
+   .income-opt/.sheet-btn.primary. */
+.hist-row:disabled { cursor: default; }
+.hist-row-swatch { width: 11px; height: 11px; border-radius: 3px; flex: none; }
+.hist-row-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hist-row-delta { font-size: 12px; font-weight: 700; flex: none; }
+.hist-row-sum {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px; font-weight: 700; flex: none;
+  min-width: 68px; text-align: right;
+}
+.hist-back {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 8px 6px 0;
+  background: transparent; border: none;
+  color: var(--text-muted);
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer;
+}
+.hist-person-bar {
+  display: flex; height: 8px; border-radius: 999px; overflow: hidden;
+  margin-top: 8px;
+}
+.hist-person-legend {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  margin-top: 8px;
+  font-size: 12px; font-weight: 700; color: var(--text-muted);
+}
+
+/* Тост із дією. Один за раз, унизу над таббаром. */
+.toast {
+  position: fixed;
+  left: 12px; right: 12px; bottom: calc(78px + env(safe-area-inset-bottom));
+  z-index: 90;
+  max-width: var(--app-max);
+  margin: 0 auto;
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px;
+  background: var(--card-inset);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.45);
+  animation: popIn .18s ease;
+}
+.toast-text { flex: 1; font-size: 13px; font-weight: 700; color: var(--text); }
+.toast-action {
+  padding: 8px 12px;
+  background: transparent; border: none;
+  color: var(--gold); font-family: inherit; font-size: 13px; font-weight: 800;
+  cursor: pointer;
+}
+
+/* Згорнута група закритих цілей. Патерн — як .orph-group у конвертаціях
+   Binance, але власний префікс: .orph-* належить крипті. */
+.goals-closed-group {
+  margin-top: 10px; width: 100%; min-height: 44px; padding: 0 4px;
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: none; cursor: pointer; font-family: inherit;
+  font-size: 12px; font-weight: 700; color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+.goals-closed-list {
+  margin-top: 4px; background: var(--card); border: 1px solid rgba(255,255,255,.05);
+  border-radius: 14px; overflow: hidden;
+}
+.goals-closed-row {
+  display: flex; align-items: center; gap: 8px; width: 100%; min-height: 52px;
+  padding: 10px 16px; background: none; border: none;
+  border-bottom: 1px solid rgba(255,255,255,.04); cursor: pointer; text-align: left;
+  font-family: inherit; color: var(--text); font-variant-numeric: tabular-nums;
+}
+.goals-closed-row:last-child { border-bottom: none; }
+.goals-closed-row b { font-size: 13.5px; font-weight: 800; }
+.goals-closed-main { flex: 1; min-width: 0; }
+.goals-closed-title { display: block; font-size: 13px; font-weight: 700; color: var(--text); }
+.goals-closed-title i { font-style: normal; color: var(--text-dim); font-weight: 600; }
+.goals-closed-origin {
+  display: block; margin-top: 2px; font-size: 11.5px; font-weight: 600; color: var(--text-dim);
+}
+.goals-closed-warn {
+  display: flex; gap: 8px; align-items: flex-start; margin-top: 10px;
+  font-size: 11.5px; font-weight: 600; color: #F5A623; line-height: 1.45;
+}

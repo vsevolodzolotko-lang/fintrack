@@ -1,0 +1,513 @@
+// FinTrack — схема БД. Логіка та формули: ../../DATA_MODEL.md
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────── Користувачі та доступ ───────────
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  displayName  String
+  createdAt    DateTime @default(now())
+
+  monoTokens   MonoToken[]
+  pushSubs     PushSubscription[]
+  transactions Transaction[]
+  closures     CycleClosure[]
+}
+
+model MonoToken {
+  id            String    @id @default(cuid())
+  ownerId       String
+  owner         User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  tokenEnc      String // AES-256-GCM шифр персонального токена
+  clientId      String?
+  clientName    String?
+  webhookSecret String    @unique @default(cuid())
+  lastPolledAt  DateTime?
+  createdAt     DateTime  @default(now())
+
+  accounts      Account[]
+}
+
+// ─────────── Рахунки ───────────
+enum AccountKind {
+  CARD
+  JAR
+  CASH
+}
+
+model Account {
+  id           String      @id @default(cuid())
+  monoId       String?     @unique
+  monoTokenId  String?
+  monoToken    MonoToken?  @relation(fields: [monoTokenId], references: [id], onDelete: SetNull)
+  kind         AccountKind
+  isGoals      Boolean     @default(false)
+  title        String
+  currencyCode Int         @default(980)
+  iban         String?
+  maskedPan    String[]    @default([])
+  balance      BigInt      @default(0)
+  isHidden     Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+
+  transactions Transaction[]
+  goals        Goal[]
+}
+
+// ─────────── Транзакції ───────────
+enum TxSource {
+  MONO
+  CASH
+}
+
+enum Envelope {
+  LIVING
+  ENTERTAINMENT
+  INVESTMENT
+  INCOME
+  INTERNAL_TRANSFER
+  GOAL_CONTRIBUTION
+  UNCATEGORIZED
+}
+
+enum InstrumentKind {
+  OVDP    // ОВДП — держоблігації (грн)
+  REIT    // Inzhur REIT — сертифікати
+  CRYPTO  // Крипта
+}
+
+// Тип надходження на карту. Визначає, чи створюються зобов'язання 15/15/70.
+// null на позитивній транзакції = ще не розібрано (у черзі Review).
+enum IncomeKind {
+  SALARY        // зарплата — дохід, ділиться, велика відкриває цикл
+  OTHER_INCOME  // премія / підробіток / подарунок / продаж — дохід, ділиться
+  REFUND        // повернення боргу / з магазину / компенсація — мінус-витрата
+  CASHBACK      // кешбек і % на залишок — мінус-витрата
+  SELF_TRANSFER // переказ між своїми рахунками — нейтрально
+}
+
+model Transaction {
+  id              String    @id @default(cuid())
+  monoId          String?   @unique
+  source          TxSource
+  accountId       String
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  time            DateTime
+  amount          BigInt
+  currencyCode    Int       @default(980)
+  operationAmt    BigInt?
+  balance         BigInt?
+  description     String
+  comment         String?
+  mcc             Int?
+  originalMcc     Int?
+  counterName     String?
+  counterIban     String?
+  counterEdrpou   String?
+  cashbackAmount  BigInt    @default(0)
+  commissionRate  BigInt    @default(0)
+  hold            Boolean   @default(false)
+
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  envelope        Envelope  @default(UNCATEGORIZED)
+  isIncome        Boolean   @default(false)
+  incomeKind      IncomeKind? // лише для amount > 0; null = не розібрано
+  needsReview     Boolean   @default(false)
+  autoCategorized Boolean   @default(false)
+
+  cycleId         String?
+  cycle           Cycle?    @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  goalAllocation  GoalAllocation?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([time])
+  @@index([cycleId, envelope])
+  @@index([userId])
+  @@index([categoryId])
+  @@index([needsReview])
+}
+
+// ─────────── Категорії та правила ───────────
+model Category {
+  id              String     @id @default(cuid())
+  name            String
+  icon            String?
+  color           String?
+  parentId        String?
+  parent          Category?  @relation("CatTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children        Category[] @relation("CatTree")
+  defaultEnvelope Envelope   @default(LIVING)
+  isSystem        Boolean    @default(false)
+  plannedAmount   BigInt? // м'який план на цикл, копійки; null = ще не задано
+  reserveUpfront  Boolean @default(false) // грудкуваті рахунки: резервувати оцінку наперед
+
+  // Радіальний категоризатор: сектор колеса (0..6), порядок листа у фані,
+  // коротка назва для підпису на фані. Слово Envelope не використовуємо —
+  // воно вже означає бюджетний конверт, а сектор конвертом не є.
+  radialSlot      Int?
+  radialOrder     Int     @default(100)
+  shortName       String?
+
+  transactions    Transaction[]
+  rules           CategoryRule[]
+}
+
+model CategoryRule {
+  id               String   @id @default(cuid())
+  priority         Int      @default(100)
+  mcc              Int?
+  merchantPattern  String?
+  amountMin        BigInt?
+  amountMax        BigInt?
+  resultCategoryId String
+  resultCategory   Category @relation(fields: [resultCategoryId], references: [id], onDelete: Cascade)
+  resultEnvelope   Envelope?
+  enabled          Boolean  @default(true)
+  createdAt        DateTime @default(now())
+
+  @@index([priority])
+}
+
+// Запам'ятований вибір типу надходження для відправника. ПІДКАЗУЄ (⭐ у Review),
+// але не застосовується сама — вибір завжди за людиною.
+model IncomeRule {
+  id          String     @id @default(cuid())
+  matchKey    String     @unique // counterEdrpou ?? counterIban ?? lower(description)
+  kind        IncomeKind
+  startsCycle Boolean? // лише для SALARY: чи відкривати цикл; null = за порогом
+  hits        Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+// ─────────── Бюджетні цикли ───────────
+enum CycleStatus {
+  ACTIVE
+  CLOSED
+}
+
+model Cycle {
+  id               String      @id @default(cuid())
+  startDate        DateTime
+  expectedEnd      DateTime
+  endDate          DateTime?
+  status           CycleStatus @default(ACTIVE)
+  triggeredByTxId  String?     @unique
+
+  pctInvestment    Int         @default(15)
+  pctEntertainment Int         @default(15) // застаріле — не використовується (модель 70/15/15 з Цілями)
+  pctGoals         Int         @default(15)
+  pctLiving        Int         @default(70)
+  pctOvdp          Int         @default(65)
+  pctReit          Int         @default(25)
+  pctCrypto        Int         @default(10)
+  ovdpCarryUah     BigInt      @default(0) // недобір ОВДП з попереднього циклу, копійки
+  // Розподілений залишок побуту з попереднього циклу (див. CycleClosure).
+  // Додається ПОНАД відсотки: goalsBudget = 15% + goalsCarryUah тощо.
+  goalsCarryUah    BigInt      @default(0)
+  investCarryUah   BigInt      @default(0)
+  livingCarryUah   BigInt      @default(0)
+
+  transactions     Transaction[]
+  contributions    InvestmentContribution[]
+  drafts           ContributionDraft[]
+  closure          CycleClosure?
+
+  @@index([startDate])
+}
+
+model CycleClosure {
+  id                 String   @id @default(cuid())
+  cycleId            String   @unique
+  cycle              Cycle    @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  leftoverAmount     BigInt
+  toGoalsAmount      BigInt   @default(0)
+  toInvestmentAmount BigInt   @default(0)
+  toLivingAmount     BigInt   @default(0)
+  decidedById        String?
+  decidedBy          User?    @relation(fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt          DateTime @default(now())
+}
+
+// ─────────── Цілі ───────────
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+model Goal {
+  id           String     @id @default(cuid())
+  accountId    String
+  account      Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  targetAmount BigInt
+  spentAmount  BigInt? // фактично витрачено на закритті цілі, копійки; null → ще не закрита
+  closedAt     DateTime? // коли натиснули «Куплено»; null → ще не закрита
+  deadline     DateTime?
+  status       GoalStatus @default(ACTIVE)
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  allocations  GoalAllocation[]
+}
+
+model GoalAllocation {
+  id              String       @id @default(cuid())
+  goalId          String
+  goal            Goal         @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  amount          BigInt
+  sourceTxId      String?      @unique
+  sourceTx        Transaction? @relation(fields: [sourceTxId], references: [id], onDelete: SetNull)
+  transferGroupId String?
+  note            String?
+  createdAt       DateTime     @default(now())
+
+  @@index([goalId])
+  @@index([transferGroupId])
+}
+
+// ─────────── Інвестиції ───────────
+enum ContribSource {
+  RULE_15PCT
+  LEFTOVER
+  MANUAL
+  BINANCE // авто-створений із синку Binance P2P
+}
+
+model InvestmentContribution {
+  id           String         @id @default(cuid())
+  cycleId      String?
+  cycle        Cycle?         @relation(fields: [cycleId], references: [id], onDelete: SetNull)
+  kind         InstrumentKind @default(OVDP)
+  amountUah    BigInt // переказано на інструмент (для ОВДП закриває план), копійки
+  amountUsd    BigInt?
+  bondCostUah  BigInt? // ОВДП: вкладено в папери (принципал прибутку), копійки; null → =amountUah
+  quantity     Int? // ОВДП: кількість облігацій
+  date         DateTime       @default(now())
+  source       ContribSource  @default(MANUAL)
+  note         String?
+  maturityDate DateTime?      // лише для OVDP — драбинка (для купонних = дата погашення)
+  asset        String?        // тикер для CRYPTO, напр. "BTC"
+  yieldPct     Decimal?       @db.Decimal(5, 2) // дохідність % річних (OVDP без графіка), прості відсотки
+  monoTxId     String?        @unique // зв'язок із Transaction — дедуп гібридного захвату
+
+  cryptoP2POrder CryptoP2POrder?
+  cashflows      OvdpCashflow[] // ОВДП: графік купонів + погашення
+
+  @@index([cycleId, kind])
+}
+
+// Стан покрокового внеску: між «відправив» і «записав» людина виходить у
+// INZHUR, і застосунок може бути вивантажений. Крок живе на сервері, не в
+// памʼяті вкладки — саме це відповідь на «щоразу забуваю, як це робити».
+model ContributionDraft {
+  id           String         @id @default(cuid())
+  cycleId      String
+  cycle        Cycle          @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+  kind         InstrumentKind
+  step         Int // 1 = відправка, 2 = купівля (лише ОВДП), 3 = запис
+  sentUah      BigInt? // скільки реально відправив, копійки — джерело правди для кроку 3
+  boughtQty    Int? // ОВДП: скільки лотів, необовʼязково
+  unitPriceUah BigInt? // ОВДП: ціна за штуку в момент купівлі (крок 2), копійки — необовʼязково
+  updatedAt    DateTime       @updatedAt
+
+  @@unique([cycleId, kind])
+}
+
+enum OvdpFlowKind {
+  COUPON
+  REDEMPTION
+}
+
+model OvdpCashflow {
+  id             String                 @id @default(cuid())
+  contributionId String
+  contribution   InvestmentContribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+  date           DateTime // дата виплати
+  kind           OvdpFlowKind
+  amountUah      BigInt // копійки, сукупно по всіх шт. на цю дату
+
+  @@index([contributionId, date])
+}
+
+model InvestmentValuation {
+  id           String      @id @default(cuid())
+  kind      InstrumentKind @default(REIT)
+  valueUah  BigInt // «Вартість активу» з екрана «Деталі» в INZHUR, копійки
+  investedUah  BigInt? // «Проінвестовано» звідти ж — база прибутку; null = знімок до появи поля
+  dividendsUah BigInt? // «Виплачено дивідендів», накопичувально; null = не заносили
+  freeUah   BigInt         @default(0) // вільні кошти на рахунку INZHUR, копійки
+  date      DateTime       @default(now())
+  note      String?
+  createdAt DateTime       @default(now())
+
+  @@index([kind, date])
+}
+
+// ─────────── Binance (крипта) ───────────
+enum CryptoConvSource {
+  CONVERT // /sapi/v1/convert/tradeFlow
+  SPOT // /api/v3/myTrades
+}
+
+model CryptoP2POrder {
+  id             String                  @id @default(cuid())
+  orderNumber    String                  @unique // Binance orderNumber — дедуп синку
+  asset          String // "USDT"
+  fiat           String // "UAH"
+  assetQty       Decimal                 @db.Decimal(20, 8)
+  fiatAmountUah  BigInt // totalPrice у копійках
+  unitPriceUah   Decimal                 @db.Decimal(20, 8) // сплачений курс UAH за USDT
+  commissionUsdt Decimal                 @default(0) @db.Decimal(20, 8)
+  counterparty   String?
+  tradeTime      DateTime
+  marketRateUah  Decimal?                @db.Decimal(20, 8) // USDTUAH kline close на момент угоди; null = спред не розраховано
+  contributionId String?                 @unique
+  contribution   InvestmentContribution? @relation(fields: [contributionId], references: [id], onDelete: SetNull)
+  conversions    CryptoConversion[]
+  createdAt      DateTime                @default(now())
+
+  @@index([tradeTime])
+}
+
+model CryptoConversion {
+  id            String           @id @default(cuid())
+  source        CryptoConvSource
+  externalId    String // CONVERT: orderId; SPOT: "SYMBOL#tradeId" (id у myTrades — per-symbol)
+  symbol        String? // лише SPOT, напр. "BTCUSDT"
+  spotTradeId   BigInt? // лише SPOT — курсор fromId
+  fromAsset     String // "USDT"
+  fromAmount    Decimal          @db.Decimal(20, 8) // витрачено USDT (SPOT: quoteQty)
+  toAsset       String // "BTC" | "ETH" | …
+  toAmount      Decimal          @db.Decimal(20, 8) // отримано, net комісії якщо commissionAsset == toAsset
+  feeAsset      String?
+  feeAmount     Decimal          @default(0) @db.Decimal(20, 8)
+  feeUsdt       Decimal?         @db.Decimal(20, 8) // комісія в USDT на момент угоди; null = ще не пораховано
+  mktPriceUsdt  Decimal?         @db.Decimal(20, 8) // kline-ціна toAsset у USDT (implicit fee для CONVERT)
+  usdtUahRate   Decimal?         @db.Decimal(20, 8) // USDTUAH kline на момент угоди (комісія → UAH)
+  tradeTime     DateTime
+  p2pOrderId    String?
+  p2pOrder      CryptoP2POrder?  @relation(fields: [p2pOrderId], references: [id], onDelete: SetNull)
+  /// Витрачені USDT куплені поза вікном історії Binance — підтверджено вручну.
+  /// Така конвертація не тягне пул USDT, але її монети лишаються в портфелі.
+  outOfTracking Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+
+  @@unique([source, externalId])
+  @@index([tradeTime])
+  @@index([symbol, spotTradeId])
+}
+
+// Останні ціни (current value) — оновлює cron, читає /portfolio
+model CryptoPrice {
+  symbol    String   @id // "BTCUSDT", "USDTUAH", …
+  price     Decimal  @db.Decimal(20, 8)
+  updatedAt DateTime @updatedAt
+}
+
+// Singleton (id=1) — стан синку для UI
+model BinanceSyncState {
+  id         Int       @id @default(1)
+  lastSyncAt DateTime?
+  lastError  String?
+}
+
+// Фаза 3
+model Holding {
+  id          String          @id @default(cuid())
+  ticker      String          @unique
+  quantity    Decimal         @default(0) @db.Decimal(20, 8)
+  avgPriceUsd Decimal         @default(0) @db.Decimal(20, 8)
+  snapshots   PriceSnapshot[]
+}
+
+model PriceSnapshot {
+  id        String   @id @default(cuid())
+  holdingId String
+  holding   Holding  @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  date      DateTime
+  priceUsd  Decimal  @db.Decimal(20, 8)
+
+  @@unique([holdingId, date])
+}
+
+model FxRate {
+  id        String   @id @default(cuid())
+  code      Int
+  date      DateTime
+  rateToUah Decimal  @db.Decimal(20, 8)
+
+  @@unique([code, date])
+}
+
+// ─────────── Сповіщення ───────────
+enum NotifType {
+  INCOME_ARRIVED
+  DAILY_LIMIT_EXCEEDED
+  OVERSPEND_FORECAST
+  CYCLE_END
+  EVENING_REVIEW
+}
+
+model PushSubscription {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint String @unique
+  p256dh   String
+  auth     String
+}
+
+model Notification {
+  id       String    @id @default(cuid())
+  type     NotifType
+  userId   String?
+  payload  Json
+  sentAt   DateTime  @default(now())
+  readAt   DateTime?
+  actionAt DateTime?
+}
+
+model Session {
+  id        String   @id
+  data      String
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+// ─────────── Налаштування (singleton, id=1) ───────────
+model Settings {
+  id               Int    @id @default(1)
+  pctInvestment    Int    @default(15)
+  pctEntertainment Int    @default(15) // застаріле — не використовується (модель 70/15/15 з Цілями)
+  pctGoals         Int    @default(15)
+  pctLiving        Int    @default(70)
+  pctOvdp          Int    @default(65)
+  pctReit          Int    @default(25)
+  pctCrypto        Int    @default(10)
+  incomeThreshold  BigInt @default(500000)
+  cycleAnchorMin   BigInt @default(4000000)
+  cyclePeriodDays  Int    @default(31)
+  salaryDayOfMonth Int?
+  goalsAccountId   String?
+  eveningReminder  String @default("21:00")
+  timezone         String @default("Europe/Kyiv")
+  baseCurrency     Int    @default(980)
+}
