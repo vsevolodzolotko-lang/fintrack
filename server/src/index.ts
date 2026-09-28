@@ -6,6 +6,7 @@ import Fastify from "fastify";
 import cron from "node-cron";
 import { env } from "./env.js";
 import { ensureRadialTaxonomy } from "./radialTaxonomy.js";
+import { ensureGoalsOverpaidCarry } from "./mono/cycle.js";
 import { getSettings, prisma } from "./db.js";
 import { prismaSessionStore } from "./sessionStore.js";
 import { authRoutes } from "./routes/auth.js";
@@ -204,6 +205,7 @@ async function start() {
   await backfillIncomeKinds();
   await ensureWheelEnvelopeCategories();
   await ensureRadialTaxonomy(prisma);
+  await ensureGoalsOverpaidCarry();
   await app.listen({ host: "0.0.0.0", port: env.port });
   app.log.info(`FinTrack server on :${env.port}`);
 }

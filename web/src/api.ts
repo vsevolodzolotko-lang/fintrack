@@ -50,6 +50,7 @@ export interface CycleStats {
   goalsCarryUah: string;
   investCarryUah: string;
   livingCarryUah: string;
+  goalsOverpaidUah: string; // переплата на білу за минулий цикл — уже віднята з goalsBudget
   livingSpent: string;
   goalsContributed: string;
   toGoals: string;

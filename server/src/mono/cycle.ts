@@ -1,7 +1,7 @@
 import type { Cycle } from "@prisma/client";
 import { prisma, getSettings } from "../db.js";
 import { addMonths, nextDayOfMonth } from "../time.js";
-import { computeStatsCore, type CycleStats } from "./statsCore.js";
+import { computeStatsCore, goalsBudgetFor, goalsOverpaid, type CycleStats } from "./statsCore.js";
 import { computeInvestmentPlan, type InstrumentKind } from "./investCore.js";
 
 // Знайти цикл, у чий [startDate, endDate ?? +∞) потрапляє дата.
@@ -54,16 +54,50 @@ async function ovdpCarryFromCycle(prev: Cycle | null, excludeTxId?: string): Pro
   return (remaining / 100n) * 100n;
 }
 
+// Переплата на білу карту за цикл, що закривається: внесено понад його бюджет
+// цілей (15% + його carry − його власна переплата — ланцюжок, як ОВДП).
+// Дохід і внески беремо лише ДО старту нового циклу: у мить openCycle якірна ЗП
+// і все після неї ще привʼязані до prev (reassign — після), але належать новому.
+async function goalsOverpaidFromCycle(prev: Cycle | null, before: Date): Promise<bigint> {
+  if (!prev) return 0n;
+  const inc = await prisma.transaction.aggregate({
+    where: { cycleId: prev.id, isIncome: true, time: { lt: before } },
+    _sum: { amount: true },
+  });
+  const contrib = await prisma.transaction.aggregate({
+    where: { cycleId: prev.id, envelope: "GOAL_CONTRIBUTION", amount: { gt: 0n }, time: { lt: before } },
+    _sum: { amount: true },
+  });
+  const budget = goalsBudgetFor(inc._sum.amount ?? 0n, prev.pctGoals, prev.goalsCarryUah, prev.goalsOverpaidUah);
+  return goalsOverpaid(budget, contrib._sum.amount ?? 0n);
+}
+
+// Бекфіл при старті для активного циклу, відкритого до появи goalsOverpaidUah
+// (openCycle тоді її не рахував). Ідемпотентно: рахуємо лише поки поле 0,
+// а нуль після перерахунку лишається нулем.
+export async function ensureGoalsOverpaidCarry(): Promise<void> {
+  const active = await prisma.cycle.findFirst({ where: { status: "ACTIVE" }, orderBy: { startDate: "desc" } });
+  if (!active || active.goalsOverpaidUah !== 0n) return;
+  const prev = await prisma.cycle.findFirst({
+    where: { status: "CLOSED", endDate: active.startDate },
+    orderBy: { startDate: "desc" },
+  });
+  const over = await goalsOverpaidFromCycle(prev, active.startDate);
+  if (over > 0n) await prisma.cycle.update({ where: { id: active.id }, data: { goalsOverpaidUah: over } });
+}
+
 // Відкрити новий цикл на «якірний» дохід (велика ЗП), закривши попередній.
 export async function openCycle(startDate: Date, triggeredByTxId?: string): Promise<Cycle> {
   const s = await getSettings();
 
   // попередній активний цикл — знайти ДО закриття, щоб порахувати недобір ОВДП
+  // і переплату на білу
   const prev = await prisma.cycle.findFirst({
     where: { status: "ACTIVE", startDate: { lt: startDate } },
     orderBy: { startDate: "desc" },
   });
   const ovdpCarryUah = await ovdpCarryFromCycle(prev, triggeredByTxId);
+  const goalsOverpaidUah = await goalsOverpaidFromCycle(prev, startDate);
 
   // закрити активні цикли, що починались раніше
   await prisma.cycle.updateMany({
@@ -87,6 +121,7 @@ export async function openCycle(startDate: Date, triggeredByTxId?: string): Prom
       pctReit: s.pctReit,
       pctCrypto: s.pctCrypto,
       ovdpCarryUah,
+      goalsOverpaidUah,
     },
   });
 }

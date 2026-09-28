@@ -12,6 +12,8 @@ export interface CycleInput {
   goalsCarryUah: bigint;
   investCarryUah: bigint;
   livingCarryUah: bigint;
+  // Переплата на білу карту за попередній цикл — віднімається від бюджету цілей.
+  goalsOverpaidUah: bigint;
 }
 
 export interface TxInput {
@@ -51,6 +53,7 @@ export interface CycleStats {
   goalsCarryUah: bigint;
   investCarryUah: bigint;
   livingCarryUah: bigint;
+  goalsOverpaidUah: bigint;
   livingSpent: bigint;
   goalsContributed: bigint;
   toGoals: bigint;
@@ -77,6 +80,21 @@ function pct(base: bigint, p: number): bigint {
 // сумуватись рівно в бюджет (див. investCore).
 function floorGrn(kop: bigint): bigint {
   return (kop / 100n) * 100n;
+}
+
+// Бюджет цілей: 15% + перенесений залишок − переплата минулого циклу.
+// Переплата гасить борг цього циклу; нижче нуля бюджет не йде — «закинуто ✓»
+// від першого дня, а залишок переплати просто лишається в побуті.
+export function goalsBudgetFor(incomeTotal: bigint, pctGoals: number, carryUah: bigint, overpaidUah: bigint): bigint {
+  const raw = pct(incomeTotal, pctGoals) + carryUah - overpaidUah;
+  return raw > 0n ? raw : 0n;
+}
+
+// Переплата на білу карту за закритий цикл: скільки закинули понад його
+// бюджет цілей. Цілогривнева, бо ціль наступного циклу має лишатись цілою.
+export function goalsOverpaid(goalsBudget: bigint, goalsContributed: bigint): bigint {
+  const over = goalsContributed - goalsBudget;
+  return over > 0n ? floorGrn(over) : 0n;
 }
 
 // Чиста математика циклу — без Prisma, тестується юнітами.
@@ -119,7 +137,7 @@ export function computeStatsCore(
   }
 
   const investmentBudget = floorGrn(pct(incomeTotal, cycle.pctInvestment)) + cycle.investCarryUah;
-  const goalsBudget = pct(incomeTotal, cycle.pctGoals) + cycle.goalsCarryUah;
+  const goalsBudget = goalsBudgetFor(incomeTotal, cycle.pctGoals, cycle.goalsCarryUah, cycle.goalsOverpaidUah);
   const livingBudget = pct(incomeTotal, cycle.pctLiving) + cycle.livingCarryUah;
 
   // Резерв: max(оцінка, факт) по кожній reserveUpfront-категорії.
@@ -172,6 +190,7 @@ export function computeStatsCore(
     goalsCarryUah: cycle.goalsCarryUah,
     investCarryUah: cycle.investCarryUah,
     livingCarryUah: cycle.livingCarryUah,
+    goalsOverpaidUah: cycle.goalsOverpaidUah,
     livingSpent,
     goalsContributed,
     toGoals: goalsBudget - goalsContributed,

@@ -221,6 +221,10 @@ model Cycle {
   goalsCarryUah    BigInt      @default(0)
   investCarryUah   BigInt      @default(0)
   livingCarryUah   BigInt      @default(0)
+  // Переплата на білу карту за попередній цикл (внесено понад його бюджет цілей),
+  // копійки, цілогривнева. ВІДНІМАЄТЬСЯ: goalsBudget = 15% + goalsCarryUah − goalsOverpaidUah.
+  // Рахується в openCycle, як ovdpCarryUah; для циклів, відкритих до появи поля, — при старті.
+  goalsOverpaidUah BigInt      @default(0)
 
   transactions     Transaction[]
   contributions    InvestmentContribution[]

@@ -290,8 +290,8 @@ export function Dashboard({ onOpenReview }: Props) {
       )}
 
       {/* «Цілі цього місяця»: 15% доходу → закинути на білу карту */}
-      {c && Number(c.goalsBudget) > 0 && (
-        <GoalsMonthCard budget={c.goalsBudget} contributed={c.goalsContributed} remaining={c.toGoals} carry={c.goalsCarryUah} />
+      {c && (Number(c.goalsBudget) > 0 || Number(c.goalsOverpaidUah) > 0) && (
+        <GoalsMonthCard budget={c.goalsBudget} contributed={c.goalsContributed} remaining={c.toGoals} carry={c.goalsCarryUah} overpaid={c.goalsOverpaidUah} />
       )}
 
       {/* goals */}
@@ -601,8 +601,9 @@ function FundBar({ contributed, budget, color }: { contributed: string; budget: 
 }
 
 // «Цілі цього місяця»: 15% доходу треба закинути на білу карту.
-// Прогрес-бар зеленіє, коли ціль поповнення закрита.
-function GoalsMonthCard({ budget, contributed, remaining, carry }: { budget: string; contributed: string; remaining: string; carry: string }) {
+// Прогрес-бар зеленіє, коли ціль поповнення закрита. Переплата минулого
+// місяця вже віднята з budget сервером — тут лише пояснюємо, чому сума менша.
+function GoalsMonthCard({ budget, contributed, remaining, carry, overpaid }: { budget: string; contributed: string; remaining: string; carry: string; overpaid: string }) {
   const done = Number(remaining) <= 0;
   const accent = "#F5A623";
   return (
@@ -626,6 +627,11 @@ function GoalsMonthCard({ budget, contributed, remaining, carry }: { budget: str
       {Number(carry) > 0 && (
         <div style={{ marginTop: 4, fontSize: 11.5, fontWeight: 600, color: "#F5A623" }}>
           з них {fmtGrnExact(carry)} перенесено з минулого місяця
+        </div>
+      )}
+      {Number(overpaid) > 0 && (
+        <div style={{ marginTop: 4, fontSize: 11.5, fontWeight: 600, color: "#8a90a2" }}>
+          мінус {fmtGrn(overpaid)}: минулого місяця закинуто більше
         </div>
       )}
     </div>

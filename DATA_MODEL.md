@@ -170,6 +170,13 @@ model Cycle {
   pctEntertainment Int       @default(15)
   pctLiving      Int         @default(70)
 
+  // переноси з попереднього циклу (копійки), рахуються в мить відкриття / закриття
+  ovdpCarryUah     BigInt    @default(0)   // недобір ОВДП (openCycle)
+  goalsCarryUah    BigInt    @default(0)   // розподілений залишок побуту → цілі (CycleClosure)
+  investCarryUah   BigInt    @default(0)   // … → інвестиції (CycleClosure)
+  livingCarryUah   BigInt    @default(0)   // … → побут (CycleClosure)
+  goalsOverpaidUah BigInt    @default(0)   // переплата на білу понад бюджет цілей (openCycle); ВІДНІМАЄТЬСЯ
+
   transactions   Transaction[]
   contributions  InvestmentContribution[]
   closure        CycleClosure?
@@ -177,6 +184,8 @@ model Cycle {
   @@index([startDate])
 }
 // incomeTotal, *Budget — обчислювані (див. нижче), не зберігаємо, щоб не розсинхронити.
+// goalsBudget = 15% + goalsCarryUah − goalsOverpaidUah, не нижче 0: якщо минулого циклу
+// на білу закинули більше, ніж треба, борг цього циклу менший на цю суму.
 
 model CycleClosure {
   id                String   @id @default(cuid())

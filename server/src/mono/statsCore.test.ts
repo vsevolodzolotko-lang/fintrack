@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { computeStatsCore, type CategoryInput, type CycleInput, type TxInput } from "./statsCore.js";
+import { computeStatsCore, goalsOverpaid, type CategoryInput, type CycleInput, type TxInput } from "./statsCore.js";
 
 // Усі дати — фіксований липень 2026, Київ (+03:00 влітку).
 const cycle: CycleInput = {
@@ -13,6 +13,7 @@ const cycle: CycleInput = {
   goalsCarryUah: 0n,
   investCarryUah: 0n,
   livingCarryUah: 0n,
+  goalsOverpaidUah: 0n,
 };
 const NOW = new Date("2026-07-10T12:00:00+03:00"); // daysLeft = 28 (10 лип..6 серп включно)
 
@@ -110,6 +111,28 @@ describe("computeStatsCore (поточна математика, без резе
     expect(s.goalsBudget).toBe(15_000_00n);
     expect(s.goalsContributed).toBe(4_000_00n);
     expect(s.toGoals).toBe(11_000_00n);
+  });
+
+  it("переплата на білу з минулого циклу зменшує goalsBudget", () => {
+    // Минулого місяця закинули на 3 000 більше, ніж треба — цього місяця борг менший.
+    const c = { ...cycle, goalsOverpaidUah: 3_000_00n };
+    const s = computeStatsCore(c, [income(100_000_00n)], [], 0n, 0n, NOW);
+    expect(s.goalsBudget).toBe(12_000_00n);
+    expect(s.toGoals).toBe(12_000_00n);
+    expect(s.goalsOverpaidUah).toBe(3_000_00n);
+  });
+
+  it("переплата не зʼїдає перенесений залишок: carry додається, переплата віднімається", () => {
+    const c = { ...cycle, goalsCarryUah: 1_000_00n, goalsOverpaidUah: 3_000_00n };
+    const s = computeStatsCore(c, [income(100_000_00n)], [], 0n, 0n, NOW);
+    expect(s.goalsBudget).toBe(13_000_00n);
+  });
+
+  it("переплата більша за 15% — бюджет не йде в мінус", () => {
+    const c = { ...cycle, goalsOverpaidUah: 20_000_00n };
+    const s = computeStatsCore(c, [income(100_000_00n)], [], 0n, 0n, NOW);
+    expect(s.goalsBudget).toBe(0n);
+    expect(s.toGoals).toBe(0n);
   });
 });
 
@@ -215,7 +238,7 @@ describe("investmentBudget — ціла гривня (узгодження з п
       id: "c-floor", startDate: new Date("2026-07-01T00:00:00Z"),
       expectedEnd: new Date("2026-08-01T00:00:00Z"), endDate: null,
       pctInvestment: 15, pctGoals: 15, pctLiving: 70,
-      goalsCarryUah: 0n, investCarryUah: 0n, livingCarryUah: 0n,
+      goalsCarryUah: 0n, investCarryUah: 0n, livingCarryUah: 0n, goalsOverpaidUah: 0n,
     };
     const s = computeStatsCore(
       cycle,
@@ -267,5 +290,18 @@ describe("перенос залишку з минулого циклу (carry)",
     const s = computeStatsCore(cycle, [income(100_000_00n)], [], 0n, 0n, NOW);
     expect(s.livingBudget).toBe(70_000_00n);
     expect(s.livingCarryUah).toBe(0n);
+  });
+});
+
+describe("goalsOverpaid (переплата на білу за закритий цикл)", () => {
+  it("= внесено − бюджет, коли внесено більше", () => {
+    expect(goalsOverpaid(15_000_00n, 18_000_00n)).toBe(3_000_00n);
+  });
+  it("0, коли внесено менше або рівно", () => {
+    expect(goalsOverpaid(15_000_00n, 10_000_00n)).toBe(0n);
+    expect(goalsOverpaid(15_000_00n, 15_000_00n)).toBe(0n);
+  });
+  it("округлює до цілої гривні вниз — ціль наступного циклу цілогривнева", () => {
+    expect(goalsOverpaid(15_000_00n, 18_000_57n)).toBe(3_000_00n);
   });
 });

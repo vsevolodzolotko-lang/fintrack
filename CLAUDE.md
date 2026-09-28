@@ -78,6 +78,7 @@ This is an npm workspaces monorepo:
 - Envelope budgets are computed on-the-fly: `incomeTotal * pct / 100`. **Not stored** to avoid drift.
 - `dailyLimit = (livingBudget − livingSpent) / daysLeft` (self-levelling).
 - A new cycle is triggered when a large-salary income (≥ `cycleAnchorMin`, default 40 000 UAH) arrives and is confirmed; the previous cycle is closed (`status=CLOSED`, `endDate` set).
+- Carry-overs are snapshotted on the new cycle at `openCycle`: `ovdpCarryUah` (OVDP shortfall) and `goalsOverpaidUah` (white-card contributions above the closed cycle's goals budget, **subtracted** from this cycle's `goalsBudget`, floored at 0). `goalsCarryUah`/`investCarryUah`/`livingCarryUah` come later from the leftover split (`CycleClosure`). `ensureGoalsOverpaidCarry()` at boot backfills the active cycle if it was opened before the field existed.
 
 **Settings singleton**: `Settings` table always has exactly one row (id=1). Read via `getSettings()` from `db.ts`; cached per-request, not long-lived.
 
