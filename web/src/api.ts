@@ -207,12 +207,23 @@ export interface ArchivedGoal {
   allocated: string;
 }
 
+// Списання з білої картки, ще не привʼязане до цілі. explains — входить у
+// найсвіжіші, що разом покривають мінус «Вільно».
+export interface GoalOutflow {
+  id: string;
+  time: string;
+  description: string;
+  amount: string; // відʼємне, копійки
+  explains: boolean;
+}
+
 export interface GoalsResponse {
   container: { accountId: string | null; balance: string; allocated: string; unallocated: string };
   goals: Goal[];
   closed: ClosedGoal[];
   closedSpentTotal: string;
   archived: ArchivedGoal[];
+  outflows: GoalOutflow[];
 }
 
 // ─── Інвестиції ───

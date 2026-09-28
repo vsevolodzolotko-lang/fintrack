@@ -108,3 +108,37 @@ export function computeClosedGoals(
 
   return { goals: summaries, spentTotal };
 }
+
+// ─── Списання з білої картки, не покриті цілями ───
+// Баланс контейнера вже впав, а алокації — ні, тому «Вільно» в мінусі.
+// Кожне списання розвʼязується вручну (див. routes/goals.ts): автоматика зламала б
+// флоу «Куплено», де вихідний переказ — це сама покупка цілі.
+
+export interface OutflowInput {
+  id: string;
+  amount: bigint; // відʼємне
+  time: Date;
+}
+
+// Які списання пояснюють дефіцит: від найсвіжішого назад, поки сума не покриє
+// −unallocated. Порожньо, коли пул не в мінусі; всі — коли списань замало.
+export function explainDeficit(unallocated: bigint, outflows: OutflowInput[]): Set<string> {
+  const ids = new Set<string>();
+  if (unallocated >= 0n) return ids;
+  let left = -unallocated;
+  const sorted = [...outflows].sort((a, b) => b.time.getTime() - a.time.getTime());
+  for (const o of sorted) {
+    if (left <= 0n) break;
+    ids.add(o.id);
+    left -= -o.amount;
+  }
+  return ids;
+}
+
+// Скільки зняти з цілі за це списання: лише те, чого не покрив вільний пул.
+// Пул уже збалансований → 0; дефіцит менший за списання → лише дефіцит.
+export function goalDeductionFor(unallocated: bigint, outflowAbs: bigint): bigint {
+  if (unallocated >= 0n) return 0n;
+  const deficit = -unallocated;
+  return deficit < outflowAbs ? deficit : outflowAbs;
+}

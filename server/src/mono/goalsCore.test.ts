@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  computeGoalsSummary, validateAllocation, validateTransfer, computeClosedGoals,
+  computeGoalsSummary, validateAllocation, validateTransfer, computeClosedGoals, explainDeficit, goalDeductionFor,
   type GoalInput, type AllocationInput, type ClosedGoalInput,
 } from "./goalsCore.js";
 
@@ -153,5 +153,37 @@ describe("validateTransfer", () => {
   });
   it("коректне → null", () => {
     expect(validateTransfer(5_000_00n, 1_000_00n)).toBeNull();
+  });
+});
+
+describe("списання з білої картки, не покриті цілями", () => {
+  const out = (id: string, amount: bigint, time: string) => ({ id, amount, time: new Date(time) });
+
+  it("explainDeficit: підсвічує найсвіжіші списання, поки їх сума не покриє дефіцит", () => {
+    const rows = [
+      out("old", -5_000_00n, "2026-08-01T10:00:00Z"),
+      out("mid", -8_00n, "2026-09-10T10:00:00Z"),
+      out("new", -12_35n, "2026-09-20T10:00:00Z"),
+    ];
+    // дефіцит 15,00: «new» (12,35) не покриває, «mid» (8,00) добиває; «old» — ні
+    expect(explainDeficit(-15_00n, rows)).toEqual(new Set(["new", "mid"]));
+  });
+
+  it("explainDeficit: порожній набір, коли пул не в мінусі", () => {
+    expect(explainDeficit(0n, [out("a", -1_00n, "2026-09-20T10:00:00Z")])).toEqual(new Set());
+    expect(explainDeficit(5_00n, [out("a", -1_00n, "2026-09-20T10:00:00Z")])).toEqual(new Set());
+  });
+
+  it("explainDeficit: якщо списань замало — підсвічує всі", () => {
+    const rows = [out("a", -1_00n, "2026-09-20T10:00:00Z"), out("b", -2_00n, "2026-09-21T10:00:00Z")];
+    expect(explainDeficit(-10_00n, rows)).toEqual(new Set(["a", "b"]));
+  });
+
+  it("goalDeductionFor: з цілі знімається лише те, чого не покрив вільний пул", () => {
+    expect(goalDeductionFor(-12_35n, 12_35n)).toBe(12_35n);  // пул в мінусі рівно на списання
+    expect(goalDeductionFor(-5_00n, 12_35n)).toBe(5_00n);    // частину покрив пул
+    expect(goalDeductionFor(0n, 12_35n)).toBe(0n);           // пул уже збалансований
+    expect(goalDeductionFor(3_00n, 12_35n)).toBe(0n);        // вільних вистачило
+    expect(goalDeductionFor(-50_00n, 12_35n)).toBe(12_35n);  // дефіцит більший за це списання
   });
 });

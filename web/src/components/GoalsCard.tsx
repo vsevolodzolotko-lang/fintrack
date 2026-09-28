@@ -5,6 +5,7 @@ import { api, type ClosedGoal, type Goal, type GoalsResponse } from "../api";
 import { fmtGrn, fmtGrnExact, fmtDayKyiv } from "../format";
 import { AmountSheet } from "./AmountSheet";
 import { ClosedGoalSheet } from "./ClosedGoalSheet";
+import { OutflowSheet } from "./OutflowSheet";
 import { originCaption } from "../closedGoals";
 import { useToast } from "../toast";
 
@@ -27,6 +28,8 @@ export function GoalsCard() {
   const [showClosed, setShowClosed] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
   const [closedSheet, setClosedSheet] = useState<ClosedGoal | null>(null);
+  // Мінусове «Вільно» — не діагностика, а дія: чип відкриває шит списань.
+  const [outflowSheet, setOutflowSheet] = useState(false);
   // Взаємовиключно з closedSheet: два шити ніколи не стоять один на одному —
   // те саме правило, що вже діє для HelpSheet.
   const [spentSheet, setSpentSheet] = useState<{ id: string; title: string; amount: string } | null>(null);
@@ -133,11 +136,16 @@ export function GoalsCard() {
         <span className="goals-total-sum">{fmtGrn(data.container.allocated)}</span>
       </div>
 
-      {unalloc !== 0n && (
-        <div className={`goals-unalloc ${unalloc < 0n ? "neg" : ""}`}>
+      {unalloc > 0n && (
+        <div className="goals-unalloc">
           Вільно <b>{fmtGrnExact(data.container.unallocated)}</b>
-          {unalloc < 0n && <span className="hint"> — перевищення, звірте баланс</span>}
         </div>
+      )}
+      {unalloc < 0n && (
+        <button className="goals-unalloc neg as-btn" onClick={() => { setErr(""); setOutflowSheet(true); }}>
+          Вільно <b>{fmtGrnExact(data.container.unallocated)}</b>
+          <span className="hint"> · розібрати</span>
+        </button>
       )}
 
       <ul className="goals-list">
@@ -290,6 +298,15 @@ export function GoalsCard() {
             complete.mutate({ id: closeSheet.id, spentAmount: n });
           }}
           onCancel={() => { setCloseSheet(null); setErr(""); }}
+        />
+      )}
+
+      {outflowSheet && (
+        <OutflowSheet
+          outflows={data.outflows}
+          goals={visibleGoals}
+          unallocated={unalloc}
+          onClose={() => setOutflowSheet(false)}
         />
       )}
 

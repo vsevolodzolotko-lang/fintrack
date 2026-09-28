@@ -5,8 +5,10 @@ import { prisma, getSettings } from "../db.js";
 import { requireAuth } from "../auth.js";
 import {
   computeGoalsSummary, validateAllocation, validateTransfer, computeClosedGoals,
+  explainDeficit, goalDeductionFor,
   type GoalInput, type AllocationInput, type ClosedGoalInput,
 } from "../mono/goalsCore.js";
+import { TRACKING_START } from "../trackingStart.js";
 
 const grnToKop = (grn: number) => BigInt(Math.round(grn * 100));
 
@@ -87,6 +89,26 @@ async function loadArchived() {
   }));
 }
 
+// Списання з білої картки, ще не привʼязані до жодної цілі. Баланс контейнера
+// вони вже зменшили, алокації — ні, тому саме вони пояснюють мінусове «Вільно».
+// Свіжі перші; підсвічуємо ті, що покривають дефіцит (explainDeficit).
+async function loadOutflows(accountId: string, unallocated: bigint) {
+  const rows = await prisma.transaction.findMany({
+    where: {
+      accountId,
+      envelope: "GOAL_CONTRIBUTION",
+      amount: { lt: 0n },
+      time: { gte: TRACKING_START },
+      goalAllocation: null,
+    },
+    orderBy: { time: "desc" },
+    take: 10,
+    select: { id: true, time: true, description: true, amount: true },
+  });
+  const explains = explainDeficit(unallocated, rows);
+  return rows.map((r) => ({ ...r, explains: explains.has(r.id) }));
+}
+
 async function goalBalance(goalId: string): Promise<bigint> {
   const rows = await prisma.goalAllocation.findMany({ where: { goalId }, select: { amount: true } });
   return rows.reduce((acc, r) => acc + r.amount, 0n);
@@ -99,6 +121,7 @@ export async function goalRoutes(app: FastifyInstance) {
     const { accountId, summary, goalsDto } = await loadSummary();
     const closed = await loadClosed();
     const archived = await loadArchived();
+    const outflows = accountId ? await loadOutflows(accountId, summary.unallocated) : [];
     return {
       container: {
         accountId,
@@ -110,7 +133,51 @@ export async function goalRoutes(app: FastifyInstance) {
       closed: closed.goals,
       closedSpentTotal: closed.spentTotal,
       archived,
+      outflows,
     };
+  });
+
+  // Розвʼязати списання з білої картки. З цілі знімається лише те, чого не
+  // покрив вільний пул (goalDeductionFor), запис привʼязується до транзакції
+  // (sourceTxId), тож рядок зникає зі списку. asLiving — гроші пішли на побут:
+  // транзакція стає звичайною витратою LIVING і йде в чергу Review за категорією.
+  // Не автоматично: вихідний переказ може бути й покупкою цілі («Куплено»).
+  app.post("/outflows/:txId/cover", async (req, reply) => {
+    const { txId } = req.params as { txId: string };
+    const parsed = z.object({
+      goalId: z.string().optional(),
+      asLiving: z.boolean().default(false),
+    }).safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid" });
+
+    const { accountId, summary, goalsDto } = await loadSummary();
+    const tx = await prisma.transaction.findUnique({ where: { id: txId }, include: { goalAllocation: true } });
+    if (!tx || !accountId || tx.accountId !== accountId || tx.amount >= 0n) {
+      return reply.code(404).send({ error: "not_found" });
+    }
+    if (tx.goalAllocation) return reply.code(409).send({ error: "Це списання вже розвʼязано" });
+
+    const deduction = goalDeductionFor(summary.unallocated, -tx.amount);
+    const writes = [];
+    if (deduction > 0n) {
+      // одна активна ціль — береться сама; кілька — клієнт має обрати
+      const goalId = parsed.data.goalId ?? (goalsDto.length === 1 ? goalsDto[0].id : undefined);
+      if (!goalId) return reply.code(400).send({ error: "Оберіть ціль" });
+      const goal = goalsDto.find((g) => g.id === goalId);
+      if (!goal) return reply.code(404).send({ error: "Ціль не знайдено" });
+      if (goal.balance < deduction) return reply.code(400).send({ error: "У цілі недостатньо коштів" });
+      writes.push(prisma.goalAllocation.create({
+        data: { goalId, amount: -deduction, sourceTxId: tx.id, note: tx.description },
+      }));
+    }
+    if (parsed.data.asLiving) {
+      writes.push(prisma.transaction.update({
+        where: { id: tx.id },
+        data: { envelope: "LIVING", categoryId: null, needsReview: true, autoCategorized: false },
+      }));
+    }
+    if (writes.length) await prisma.$transaction(writes);
+    return { ok: true, deducted: deduction };
   });
 
   app.post("/", async (req, reply) => {
